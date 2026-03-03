@@ -399,8 +399,9 @@ function showSuccessPanel(result, data) {
             const icon = FILE_ICONS[iconKey] || '📄';
             const a = document.createElement('a');
             a.className = 'dl-btn';
-            a.href = 'data:application/pdf;base64,' + file.data;
+            a.href = file.url;        // real server URL — works in Safari and all browsers
             a.download = file.name;
+            a.target = '_blank';      // open in new tab as fallback
             a.innerHTML = `<span class="dl-icon">${icon}</span><span class="dl-name">${file.name.replace(/_/g, ' ').replace('.pdf', '')}</span>`;
             list.appendChild(a);
         });

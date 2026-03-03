@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { generateTrustPackage } = require('./generate');
 const { sendTrustPackage } = require('./email');
 
@@ -14,6 +15,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve the intake form
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Download a previously generated PDF by session ID + filename
+app.get('/download/:sessionId/:filename', (req, res) => {
+  const { sessionId, filename } = req.params;
+  // Sanitize — only allow alphanumeric, dash, underscore, dot
+  if (!/^[a-zA-Z0-9_-]+$/.test(sessionId) || !/^[a-zA-Z0-9_\-.]+$/.test(filename)) {
+    return res.status(400).send('Invalid request');
+  }
+  const filePath = path.join('/tmp', 'trustbot', sessionId, filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send('File not found or expired. Please regenerate your documents.');
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.sendFile(filePath);
 });
 
 // Generate PDFs from form data
@@ -38,16 +53,25 @@ app.post('/generate', async (req, res) => {
       return res.json({
         success: true,
         message: `Trust package emailed to ${formData.recipient_email}`,
-        files: fileNames
+        files: fileNames.map(name => ({ name }))
       });
     }
 
-    // Otherwise return the first PDF as a download (bundle later)
-    // For now, return all as base64 for client-side download
-    const files = pdfBuffers.map((buf, i) => ({
-      name: fileNames[i],
-      data: buf.toString('base64')
-    }));
+    // Save PDFs to /tmp with a unique session ID and return proper download URLs
+    const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const sessionDir = path.join('/tmp', 'trustbot', sessionId);
+    fs.mkdirSync(sessionDir, { recursive: true });
+
+    const files = pdfBuffers.map((buf, i) => {
+      const name = fileNames[i];
+      fs.writeFileSync(path.join(sessionDir, name), buf);
+      return { name, url: `/download/${sessionId}/${name}` };
+    });
+
+    // Auto-cleanup after 1 hour
+    setTimeout(() => {
+      try { fs.rmSync(sessionDir, { recursive: true, force: true }); } catch { }
+    }, 60 * 60 * 1000);
 
     res.json({ success: true, files });
 
