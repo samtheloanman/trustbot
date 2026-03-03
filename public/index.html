@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustBot — California Living Trust Generator</title>
+    <meta name="description"
+        content="Generate a complete California estate planning package including a Revocable Living Trust, Healthcare Directive, Financial Power of Attorney, and more.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=EB+Garamond:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- BACKGROUND -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <span class="logo-icon">⚖️</span>
+            <span class="logo-text">TrustBot</span>
+        </div>
+        <div class="header-subtitle">California Estate Planning Generator</div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1>Create Your California<br><span class="gradient-text">Living Trust Package</span></h1>
+        <p class="hero-sub">Answer a few questions and receive a complete estate planning package — Living Trust,
+            Healthcare Directive, Financial POA, HIPAA Authorization, and Pour-Over Will.</p>
+        <div class="doc-badges">
+            <span class="badge">📜 Revocable Living Trust</span>
+            <span class="badge">🏥 Healthcare Directive</span>
+            <span class="badge">💼 Financial POA</span>
+            <span class="badge">🔒 HIPAA Authorization</span>
+            <span class="badge">📋 Pour-Over Will</span>
+        </div>
+        <button class="btn-primary" onclick="startForm()">Get Started →</button>
+    </section>
+
+    <!-- FORM CONTAINER -->
+    <div class="form-container" id="formContainer" style="display:none;">
+        <!-- PROGRESS BAR -->
+        <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="step-indicator" id="stepIndicator"></div>
+
+        <form id="trustForm">
+
+            <!-- STEP 1: Grantor Info -->
+            <div class="step active" id="step-1">
+                <div class="step-header">
+                    <div class="step-num">01</div>
+                    <h2>About the Grantor</h2>
+                    <p>The person creating and funding the trust.</p>
+                </div>
+                <div class="field-grid">
+                    <div class="field full">
+                        <label>Full Legal Name <span class="req">*</span></label>
+                        <input type="text" id="grantor_name" name="grantor_name" placeholder="e.g. John Matthew Gamboa"
+                            required>
+                    </div>
+                    <div class="field">
+                        <label>City of Residence <span class="req">*</span></label>
+                        <input type="text" id="grantor_city" name="grantor_city" placeholder="e.g. Nipomo" required>
+                    </div>
+                    <div class="field">
+                        <label>State</label>
+                        <input type="text" id="grantor_state" name="grantor_state" value="California" readonly>
+                    </div>
+                    <div class="field full">
+                        <label>Marital Status</label>
+                        <div class="toggle-group">
+                            <button type="button" class="toggle active" data-field="marital_status" data-value="single"
+                                onclick="selectToggle(this)">Single / Widowed / Divorced</button>
+                            <button type="button" class="toggle" data-field="marital_status" data-value="married"
+                                onclick="selectToggle(this)">Married</button>
+                        </div>
+                        <input type="hidden" id="marital_status" name="marital_status" value="single">
+                    </div>
+                    <div class="field full" id="spouse_field" style="display:none;">
+                        <label>Spouse's Full Legal Name</label>
+                        <input type="text" id="spouse_name" name="spouse_name" placeholder="e.g. Maria Elena Gamboa">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Trust Name -->
+            <div class="step" id="step-2">
+                <div class="step-header">
+                    <div class="step-num">02</div>
+                    <h2>Name Your Trust</h2>
+                    <p>This is the official legal name of the trust. It's often named after the grantor or a property.
+                    </p>
+                </div>
+                <div class="field-grid">
+                    <div class="field full">
+                        <label>Trust Name <span class="req">*</span></label>
+                        <input type="text" id="trust_name" name="trust_name"
+                            placeholder="e.g. The 652 Shady Lane Revocable Living Trust" required>
+                        <div class="field-hint">Tip: Named after the grantor (e.g. "The John Gamboa Revocable Living
+                            Trust") or a property address.</div>
+                    </div>
+                    <div class="field">
+                        <label>Date of Execution <span class="req">*</span></label>
+                        <input type="date" id="execution_date" name="execution_date" required>
+                    </div>
+                    <div class="field">
+                        <label>City of Execution</label>
+                        <input type="text" id="execution_city" name="execution_city" placeholder="e.g. Nipomo">
+                    </div>
+                    <div class="field">
+                        <label>County (for Notary)</label>
+                        <input type="text" id="notary_county" name="notary_county" placeholder="e.g. San Luis Obispo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Trustees -->
+            <div class="step" id="step-3">
+                <div class="step-header">
+                    <div class="step-num">03</div>
+                    <h2>Successor Trustees</h2>
+                    <p>You (the Grantor) serve as Primary Trustee during your lifetime. Successor Trustees take over if
+                        you become incapacitated or die.</p>
+                </div>
+                <div class="info-box">
+                    <strong>Primary Trustee:</strong> <span id="primaryTrusteeDisplay">—</span> (you, the Grantor)
+                </div>
+                <div id="successorTrustees">
+                    <div class="trustee-row" id="trustee-row-1">
+                        <div class="row-label">Successor Trustee #1 <span class="req">*</span></div>
+                        <div class="field-grid">
+                            <div class="field">
+                                <label>Full Name</label>
+                                <input type="text" id="successor_trustee_1_name" name="successor_trustee_1_name"
+                                    placeholder="e.g. Arthur Gamboa" required>
+                            </div>
+                            <div class="field">
+                                <label>City</label>
+                                <input type="text" id="successor_trustee_1_city" name="successor_trustee_1_city"
+                                    placeholder="e.g. Nipomo">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="trustee-row" id="trustee-row-2">
+                        <div class="row-label">Successor Trustee #2 <em>(optional)</em></div>
+                        <div class="field-grid">
+                            <div class="field">
+                                <label>Full Name</label>
+                                <input type="text" id="successor_trustee_2_name" name="successor_trustee_2_name"
+                                    placeholder="e.g. Consuelo Gamboa">
+                            </div>
+                            <div class="field">
+                                <label>City</label>
+                                <input type="text" id="successor_trustee_2_city" name="successor_trustee_2_city"
+                                    placeholder="e.g. Nipomo">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="trustee-row" id="trustee-row-3" style="display:none;">
+                        <div class="row-label">Successor Trustee #3 <em>(optional)</em></div>
+                        <div class="field-grid">
+                            <div class="field">
+                                <label>Full Name</label>
+                                <input type="text" id="successor_trustee_3_name" name="successor_trustee_3_name">
+                            </div>
+                            <div class="field">
+                                <label>City</label>
+                                <input type="text" id="successor_trustee_3_city" name="successor_trustee_3_city">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-ghost" onclick="toggleTrustee3()">+ Add Third Successor
+                    Trustee</button>
+            </div>
+
+            <!-- STEP 4: Beneficiaries -->
+            <div class="step" id="step-4">
+                <div class="step-header">
+                    <div class="step-num">04</div>
+                    <h2>Beneficiaries</h2>
+                    <p>Who receives the trust assets after your death? Shares must total 100%.</p>
+                </div>
+                <div id="beneficiariesList"></div>
+                <button type="button" class="btn-ghost" onclick="addBeneficiary()">+ Add Beneficiary</button>
+                <div class="share-total">
+                    <span>Total Shares: </span><span id="shareTotal" class="share-sum">0%</span>
+                    <span id="shareWarning" class="share-warn" style="display:none;"> ⚠ Must equal 100%</span>
+                </div>
+            </div>
+
+            <!-- STEP 5: Schedule A — Properties -->
+            <div class="step" id="step-5">
+                <div class="step-header">
+                    <div class="step-num">05</div>
+                    <h2>Schedule A — Trust Property</h2>
+                    <p>List all assets to transfer into the trust: real estate, bank accounts, vehicles, investments,
+                        business interests, etc.</p>
+                </div>
+                <div id="propertiesList"></div>
+                <button type="button" class="btn-ghost" onclick="addProperty()">+ Add Property / Asset</button>
+                <div class="info-box" style="margin-top:16px;">
+                    <strong>Note:</strong> Real property requires a <em>grant deed</em> to be separately executed and
+                    recorded with your county recorder. Retirement accounts (IRA, 401k) should NOT be retitled into the
+                    trust — update beneficiary designations instead.
+                </div>
+            </div>
+
+            <!-- STEP 6: Healthcare Directive -->
+            <div class="step" id="step-6">
+                <div class="step-header">
+                    <div class="step-num">06</div>
+                    <h2>Healthcare Directive</h2>
+                    <p>Designate someone to make medical decisions if you cannot. This combines a Living Will and
+                        Healthcare POA.</p>
+                </div>
+                <div class="field-grid">
+                    <div class="field full">
+                        <label>Healthcare Agent (Primary)</label>
+                        <input type="text" id="healthcare_agent_name" name="healthcare_agent_name"
+                            placeholder="Defaults to Successor Trustee #1">
+                    </div>
+                    <div class="field full">
+                        <label>Alternate Healthcare Agent</label>
+                        <input type="text" id="alternate_healthcare_agent" name="alternate_healthcare_agent"
+                            placeholder="Defaults to Successor Trustee #2">
+                    </div>
+                    <div class="field full">
+                        <label>Primary Physician <em>(optional)</em></label>
+                        <input type="text" id="primary_physician_name" name="primary_physician_name"
+                            placeholder="Dr. (Name)">
+                    </div>
+                    <div class="field full">
+                        <label>Life-Sustaining Treatment Preferences</label>
+                        <div class="toggle-group vertical">
+                            <button type="button" class="toggle active" data-field="life_sustaining_treatment"
+                                data-value="comfort_only" onclick="selectToggle(this)">
+                                <strong>Comfort / Palliative Care Only</strong> — Do not prolong life if hopeless
+                            </button>
+                            <button type="button" class="toggle" data-field="life_sustaining_treatment"
+                                data-value="prolong_life" onclick="selectToggle(this)">
+                                <strong>Prolong Life</strong> — Use all available treatments
+                            </button>
+                        </div>
+                        <input type="hidden" id="life_sustaining_treatment" name="life_sustaining_treatment"
+                            value="comfort_only">
+                    </div>
+                    <div class="field full">
+                        <label>Organ Donation</label>
+                        <div class="toggle-group">
+                            <button type="button" class="toggle active" data-field="organ_donation" data-value="yes"
+                                onclick="selectToggle(this)">Yes — Donate Organs</button>
+                            <button type="button" class="toggle" data-field="organ_donation" data-value="no"
+                                onclick="selectToggle(this)">No — Do Not Donate</button>
+                        </div>
+                        <input type="hidden" id="organ_donation" name="organ_donation" value="yes">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 7: Financial POA -->
+            <div class="step" id="step-7">
+                <div class="step-header">
+                    <div class="step-num">07</div>
+                    <h2>Financial Power of Attorney</h2>
+                    <p>Who can manage your finances if you are incapacitated? (Cal. Prob. Code §4401)</p>
+                </div>
+                <div class="field-grid">
+                    <div class="field full">
+                        <label>Financial Agent (Primary)</label>
+                        <input type="text" id="financial_agent_name" name="financial_agent_name"
+                            placeholder="Defaults to Successor Trustee #1">
+                    </div>
+                    <div class="field">
+                        <label>Agent's City</label>
+                        <input type="text" id="financial_agent_city" name="financial_agent_city" placeholder="">
+                    </div>
+                    <div class="field full">
+                        <label>Alternate Financial Agent</label>
+                        <input type="text" id="alternate_financial_agent" name="alternate_financial_agent"
+                            placeholder="Defaults to Successor Trustee #2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 8: Delivery -->
+            <div class="step" id="step-8">
+                <div class="step-header">
+                    <div class="step-num">08</div>
+                    <h2>Delivery</h2>
+                    <p>How would you like to receive your completed estate planning package?</p>
+                </div>
+                <div class="field-grid">
+                    <div class="field full">
+                        <div class="toggle-group">
+                            <button type="button" class="toggle active" data-field="delivery_method"
+                                data-value="download" onclick="selectToggle(this)">⬇ Download PDFs</button>
+                            <button type="button" class="toggle" data-field="delivery_method" data-value="email"
+                                onclick="selectToggle(this)">✉ Email PDFs</button>
+                        </div>
+                        <input type="hidden" id="delivery_method" name="delivery_method" value="download">
+                    </div>
+                    <div class="field full" id="emailField" style="display:none;">
+                        <label>Client Email Address</label>
+                        <input type="email" id="recipient_email" name="recipient_email"
+                            placeholder="client@example.com">
+                    </div>
+                </div>
+
+                <div class="review-card" id="reviewCard">
+                    <h3>📝 Review Summary</h3>
+                    <div id="reviewSummary"></div>
+                </div>
+
+                <div class="disclaimer-text">
+                    <strong>Disclaimer:</strong> These documents are generated for informational purposes and based on
+                    California Probate Code as of 2024. They do not constitute legal advice. We recommend review by a
+                    licensed California estate planning attorney before execution.
+                </div>
+            </div>
+
+        </form>
+
+        <!-- NAV BUTTONS -->
+        <div class="form-nav">
+            <button type="button" class="btn-ghost" id="prevBtn" onclick="changeStep(-1)" style="display:none;">←
+                Back</button>
+            <div class="step-dots" id="stepDots"></div>
+            <button type="button" class="btn-primary" id="nextBtn" onclick="changeStep(1)">Next →</button>
+        </div>
+    </div>
+
+    <!-- SUCCESS PANEL -->
+    <div class="success-panel" id="successPanel" style="display:none;">
+        <div class="success-icon">✅</div>
+        <h2>Your Documents Are Ready!</h2>
+        <p id="successMessage"></p>
+        <div class="download-list" id="downloadList"></div>
+        <button class="btn-primary" onclick="startOver()">Create Another Package</button>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+        <div class="spinner"></div>
+        <p>Generating your estate planning package…</p>
+        <p style="font-size:13px; opacity:0.7;">This may take 20–30 seconds</p>
+    </div>
+
+    <footer>
+        <p>TrustBot &mdash; California Estate Planning Generator &mdash; Based on CA Probate Code §§ 4701, 4401, 15000
+            et seq.</p>
+        <p style="opacity:0.5;">Not a substitute for legal advice. Consult a licensed California estate planning
+            attorney.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

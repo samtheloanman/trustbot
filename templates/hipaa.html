@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>HIPAA Authorization — {{grantor_name}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap');
+
+        body {
+            font-family: 'EB Garamond', serif;
+            font-size: 12pt;
+            line-height: 1.7;
+            color: #111;
+        }
+
+        h1 {
+            font-size: 17pt;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .box {
+            border: 1px solid #555;
+            padding: 12px 18px;
+            margin: 14px 0;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #333;
+            display: inline-block;
+            width: 260px;
+            margin-top: 36px;
+        }
+
+        .sig-label {
+            font-size: 10pt;
+            margin-top: 4px;
+        }
+
+        .disclaimer {
+            font-size: 10pt;
+            font-style: italic;
+            background: #f7f7f7;
+            padding: 8px;
+            border-left: 3px solid #999;
+            margin: 10px 0;
+        }
+
+        ol {
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>HIPAA Authorization for Release of Medical Information</h1>
+    <div style="text-align:center; font-style:italic; margin-bottom:14px;">Pursuant to 45 C.F.R. § 164.508 and
+        California Health &amp; Safety Code § 123115</div>
+
+    <div class="disclaimer">This authorization allows your healthcare providers to share your protected health
+        information with your designated representatives, including your healthcare agent and successor trustee.</div>
+
+    <div class="box">
+        <strong>Patient / Principal:</strong> {{grantor_name}}<br>
+        <strong>Date of Birth:</strong> ____________________________<br>
+        <strong>Address:</strong> {{grantor_city}}, {{grantor_state}}
+    </div>
+
+    <h2>1. Authorized Representatives</h2>
+    <div class="box">
+        <strong>Primary Representative / Healthcare Agent:</strong> {{healthcare_agent_name}} — Phone:
+        ____________________<br><br>
+        <strong>Alternate / Successor Trustee:</strong> {{alternate_healthcare_agent}} — Phone: ____________________
+    </div>
+
+    <h2>2. Information to Be Released</h2>
+    <p>All protected health information including: medical records, diagnoses, treatment plans, mental health records,
+        substance use records, HIV/AIDS records (Cal. Health &amp; Safety Code § 120980), prescription records, and
+        billing/insurance records.</p>
+
+    <h2>3. Purpose</h2>
+    <ol type="a">
+        <li>To allow my representative to make informed healthcare decisions on my behalf;</li>
+        <li>To enable my successor trustee to manage my financial and estate planning affairs;</li>
+        <li>To determine whether I have become Incapacitated under the <strong>{{trust_name}}</strong> or my Durable
+            Power of Attorney.</li>
+    </ol>
+
+    <h2>4. Expiration</h2>
+    <p>This Authorization remains in effect until my death, my written revocation, or: _________________________
+        (specific date, if any). It survives my incapacity.</p>
+
+    <h2>5. Rights and Voluntary Consent</h2>
+    <p>I understand I have the right to revoke this Authorization in writing at any time. I understand that signing is
+        voluntary and is not a condition of receiving any treatment or benefit. Information disclosed may be subject to
+        re-disclosure by the recipient.</p>
+
+    <h2>6. Signature</h2>
+    <div style="margin-top:36px;">
+        <div class="sig-line"></div>
+        <div class="sig-label"><strong>{{grantor_name}}</strong>, Principal — Date: ______________</div>
+    </div>
+
+    <div style="margin-top:30px;">
+        <p><em>If signed by personal representative:</em></p>
+        <div class="sig-line"></div>
+        <div class="sig-label">Signature of Personal Representative — Date: ______________</div>
+        <div class="sig-line"></div>
+        <div class="sig-label">Printed Name &amp; Authority (e.g., Power of Attorney)</div>
+    </div>
+
+</body>
+
+</html>

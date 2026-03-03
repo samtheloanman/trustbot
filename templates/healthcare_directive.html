@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>California Advance Health Care Directive — {{grantor_name}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+        body {
+            font-family: 'EB Garamond', serif;
+            font-size: 12pt;
+            line-height: 1.7;
+            color: #111;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 17pt;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .box {
+            border: 1px solid #555;
+            padding: 12px 18px;
+            margin: 16px 0;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #333;
+            display: inline-block;
+            width: 260px;
+            margin-top: 36px;
+            vertical-align: bottom;
+        }
+
+        .sig-label {
+            font-size: 10pt;
+            margin-top: 4px;
+        }
+
+        .disclaimer {
+            font-size: 10pt;
+            font-style: italic;
+            margin: 10px 0;
+            background: #f7f7f7;
+            padding: 8px;
+            border-left: 3px solid #999;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .check-item {
+            margin: 8px 0;
+        }
+
+        .notary-box {
+            border: 1px solid #333;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .notary-box h3 {
+            text-align: center;
+            font-size: 12pt;
+            margin-top: 0;
+        }
+
+        ol {
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+
+        strong {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>California Advance Health Care Directive</h1>
+    <div class="center" style="font-style:italic; margin-bottom:16px;">
+        (Living Will and Healthcare Power of Attorney Combined)<br>
+        Pursuant to California Probate Code § 4701
+    </div>
+    <div class="disclaimer">
+        <strong>Notice to Person Completing This Form:</strong> This form lets you name an individual, called an agent,
+        to make health care decisions for you if you lose the capacity to make your own decisions or if you want someone
+        else to make those decisions for you now even though you have that capacity. You may also use this form to give
+        specific instructions about any aspect of your health care. Carefully read all information before signing.
+        Consult a lawyer if desired.
+    </div>
+
+    <div class="box">
+        <strong>Principal:</strong> {{grantor_name}}<br>
+        <strong>Address:</strong> {{grantor_city}}, {{grantor_state}}<br>
+        <strong>Date:</strong> {{execution_day_ordinal}} day of {{execution_month}}, {{execution_year}}
+    </div>
+
+    <h2>Part 1 — Power of Attorney for Health Care</h2>
+
+    <p><strong>1.1 Designation of Agent.</strong> I, <strong>{{grantor_name}}</strong>, designate the following
+        individual as my agent to make health care decisions for me:</p>
+    <div class="box">
+        <strong>Agent:</strong> {{healthcare_agent_name}}<br>
+        <strong>City:</strong> {{healthcare_agent_city}}<br>
+        <strong>Phone:</strong> ____________________________
+    </div>
+
+    <p>If my agent is not willing, able, or reasonably available to make a health care decision for me, I designate as
+        my first alternate agent:</p>
+    <div class="box">
+        <strong>Alternate Agent:</strong> {{alternate_healthcare_agent}}<br>
+        <strong>Phone:</strong> ____________________________
+    </div>
+
+    <p><strong>1.2 Agent's Authority.</strong> My agent is authorized to make all health care decisions for me,
+        including but not limited to: decisions to provide, withhold, or withdraw artificial nutrition and hydration and
+        all other forms of health care to keep me alive, except as I state here:</p>
+    <div class="box" style="min-height:50px;">
+        ____________________________________________________________________________<br>
+        ____________________________________________________________________________
+    </div>
+
+    <p><strong>1.3 When Agent's Authority Becomes Effective.</strong> My agent's authority becomes effective when my
+        primary physician determines that I lack the capacity to make my own health care decisions, UNLESS I initial
+        below:</p>
+    <p>☐ <em>My agent's authority to make health care decisions for me takes effect immediately.</em></p>
+
+    <p><strong>1.4 Agent's Obligation.</strong> My agent shall make health care decisions for me in accordance with this
+        power of attorney for health care, any instructions I give in Part 2 of this form, and my other wishes to the
+        extent known. To the extent my wishes are unknown, my agent shall make health care decisions for me in
+        accordance with what my agent determines to be in my best interest. In determining my best interest, my agent
+        shall consider my personal values and beliefs to the extent known.</p>
+
+    <p><strong>1.5 Agent's Postdeath Authority.</strong> My agent is authorized to make anatomical gifts, authorize an
+        autopsy, and direct disposition of my remains, except as I state here or in Part 3 of this form:</p>
+    <div class="box" style="min-height:40px;">
+        ____________________________________________________________________________
+    </div>
+
+    <p><strong>1.6 Nomination of Conservator.</strong> If a conservator of my person needs to be appointed for me by a
+        court, I nominate the agent designated in this form. If that agent is not willing, able, or reasonably available
+        to act as conservator, I nominate the alternate agents listed above, in the order listed.</p>
+
+    <h2>Part 2 — Instructions for Health Care</h2>
+    <p>If you fill out this part of the form, you may strike any wording you do not want.</p>
+
+    <p><strong>End-of-Life Decisions.</strong> I direct that my health care providers and others involved in my care
+        provide, withhold, or withdraw treatment in accordance with the choice I have indicated below:</p>
+
+    <div class="check-item">☐ <strong>Choice Not To Prolong Life.</strong> I do not want my life to be prolonged if (1)
+        I have an incurable and irreversible condition that will result in my death within a relatively short time; (2)
+        I become unconscious and, to a reasonable degree of medical certainty, I will not regain consciousness; or (3)
+        the likely risks and burdens of treatment would outweigh the expected benefits.</div>
+    <div class="check-item">☐ <strong>Choice To Prolong Life.</strong> I want my life to be prolonged as long as
+        possible within the limits of generally accepted health care standards.</div>
+
+    <p><strong>Additional requests:</strong></p>
+    <div class="box" style="min-height:60px;">
+        ____________________________________________________________________________<br>
+        ____________________________________________________________________________<br>
+        ____________________________________________________________________________
+    </div>
+
+    <p><strong>Pain Relief.</strong> Except as I state in the box above, I direct that treatment for alleviation of pain
+        or discomfort be provided at all times, even if it hastens my death.</p>
+
+    <p><strong>Other Wishes.</strong> (If you do not agree with any of the optional choices above and wish to write your
+        own, or if you wish to add to the instructions you have given above, you may do so here.)</p>
+    <div class="box" style="min-height:60px;">
+        ____________________________________________________________________________<br>
+        ____________________________________________________________________________
+    </div>
+
+    <h2>Part 3 — Donation of Organs at Death</h2>
+    <p>(optional)</p>
+    {{#if organ_donation}}
+    <p>Upon my death, I give all of my organs, tissues, or eyes for the purpose of:
+        <strong>{{organ_donation_purpose}}</strong>.</p>
+    {{else}}
+    <p>☐ Upon my death, I give any needed organs, tissues, or eyes.<br>
+        ☐ Upon my death, I give the following organs, tissues, or eyes only: _______________<br>
+        ☐ I do not wish to donate organs, tissues, or eyes.</p>
+    {{/if}}
+
+    <h2>Part 4 — Primary Physician (Optional)</h2>
+    <p>I designate the following physician as my primary physician:</p>
+    <div class="box">
+        <strong>Physician:</strong> {{#if
+        primary_physician_name}}{{primary_physician_name}}{{else}}____________________________{{/if}}<br>
+        <strong>Phone:</strong> ____________________________
+    </div>
+
+    <!-- SIGNATURE BLOCK -->
+    <div class="page-break">
+        <h2>Part 5 — Signature</h2>
+        <div class="disclaimer">
+            <strong>SIGN AND DATE THE FORM HERE:</strong> By signing here I indicate that I understand the purpose and
+            effect of this document.
+        </div>
+
+        <p>I sign my name to this Power of Attorney for Health Care on the <strong>{{execution_day_ordinal}}</strong>
+            day of <strong>{{execution_month}}</strong>, <strong>{{execution_year}}</strong>, at
+            <strong>{{execution_city}}, {{execution_state}}</strong>.</p>
+
+        <div class="sig-line"></div>
+        <div class="sig-label"><strong>{{grantor_name}}</strong>, Principal</div>
+
+        <h2>Witness Declarations</h2>
+        <div class="disclaimer">
+            <strong>STATEMENT OF WITNESSES:</strong> I declare under penalty of perjury under the laws of California (1)
+            that the individual who signed or acknowledged this advance directive is personally known to me, or that the
+            individual's identity was proved to me by convincing evidence; (2) that the individual signed or
+            acknowledged this advance directive in my presence; (3) that the individual appears to be of sound mind and
+            under no duress, fraud, or undue influence; (4) that I am not a person appointed as agent by this advance
+            directive; and (5) that I am not the individual's health care provider, an employee of the individual's
+            health care provider, the operator of a community care facility, an employee of an operator of a community
+            care facility, the operator of a residential care facility for the elderly, or an employee of an operator of
+            a residential care facility for the elderly.
+        </div>
+
+        <div style="display:flex; gap:60px; margin-top:20px;">
+            <div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #1 Signature<br>Date: ______________</div>
+                <div class="sig-line" style="width:220px;"></div>
+                <div class="sig-label">Witness #1 Name (Print)</div>
+                <div class="sig-line" style="width:220px;"></div>
+                <div class="sig-label">Witness #1 Address</div>
+            </div>
+            <div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #2 Signature<br>Date: ______________</div>
+                <div class="sig-line" style="width:220px;"></div>
+                <div class="sig-label">Witness #2 Name (Print)</div>
+                <div class="sig-line" style="width:220px;"></div>
+                <div class="sig-label">Witness #2 Address</div>
+            </div>
+        </div>
+
+        <div class="disclaimer" style="margin-top:20px;">
+            <strong>Additional Witness Requirement for Skilled Nursing Facilities:</strong> If you are a patient in a
+            skilled nursing facility, one of the witnesses must be a patient advocate or ombudsman. The patient advocate
+            or ombudsman must sign the following declaration:
+        </div>
+        <p>I further declare under penalty of perjury that I am a patient advocate or ombudsman as designated by the
+            State Department of Aging and that I am serving as a witness as required by subdivision (f) of Health and
+            Safety Code Section 1418.8.</p>
+        <div class="sig-line"></div>
+        <div class="sig-label">Patient Advocate / Ombudsman (if applicable)</div>
+
+        <!-- NOTARY OPTION -->
+        <div class="notary-box" style="margin-top:36px;">
+            <h3>OPTIONAL — Notary Acknowledgment</h3>
+            <p style="font-size:10pt;font-style:italic;">(This document may be notarized <em>instead</em> of using the
+                above witness declarations.)</p>
+            <p><strong>STATE OF CALIFORNIA, COUNTY OF {{notary_county}}</strong></p>
+            <p>On _________________________, before me, _________________________, Notary Public, personally appeared
+                <strong>{{grantor_name}}</strong>, who proved to me on satisfactory evidence to be the person whose name
+                is subscribed to this instrument, who acknowledged that they executed the same in their authorized
+                capacity, and that by their signature the person executed the instrument.</p>
+            <p>I certify under PENALTY OF PERJURY that the foregoing is true and correct. WITNESS my hand and official
+                seal.</p>
+            <div style="margin-top:24px;">
+                <div class="sig-line"></div>
+                <div class="sig-label">Signature of Notary Public</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

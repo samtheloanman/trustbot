@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>California Durable Power of Attorney for Finances — {{grantor_name}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+        body {
+            font-family: 'EB Garamond', serif;
+            font-size: 12pt;
+            line-height: 1.7;
+            color: #111;
+        }
+
+        h1 {
+            font-size: 17pt;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .box {
+            border: 1px solid #555;
+            padding: 12px 18px;
+            margin: 14px 0;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #333;
+            display: inline-block;
+            width: 260px;
+            margin-top: 36px;
+            vertical-align: bottom;
+        }
+
+        .sig-label {
+            font-size: 10pt;
+            margin-top: 4px;
+        }
+
+        .disclaimer {
+            font-size: 10pt;
+            font-style: italic;
+            margin: 10px 0;
+            background: #f7f7f7;
+            padding: 8px;
+            border-left: 3px solid #999;
+        }
+
+        ol {
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+
+        .notary-box {
+            border: 1px solid #333;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>California Durable Power of Attorney for Finances</h1>
+    <div style="text-align:center; font-style:italic; margin-bottom:16px;">
+        Pursuant to California Probate Code §§ 4000–4545 (Power of Attorney Law) and § 4401 (Statutory Form)
+    </div>
+
+    <div class="disclaimer">
+        <strong>CAUTION — IMPORTANT DOCUMENT:</strong> This form gives the person you designate (your agent) broad
+        powers to handle your property, which may include powers to pledge, sell, or otherwise dispose of any real or
+        personal property without advance notice to you or approval by you. The powers granted will not be affected by
+        your subsequent disability or lack of legal capacity. Read this form carefully, as it is a legal document. You
+        may want to consult a lawyer to make sure this document does what you intend.
+    </div>
+
+    <div class="box">
+        <strong>Principal:</strong> {{grantor_name}} of {{grantor_city}}, {{grantor_state}}<br>
+        <strong>Date of Execution:</strong> {{execution_day_ordinal}} day of {{execution_month}}, {{execution_year}}
+    </div>
+
+    <h2>1. Designation of Agent</h2>
+    <p>I, <strong>{{grantor_name}}</strong>, hereby appoint:</p>
+    <div class="box">
+        <strong>Agent (Attorney-in-Fact):</strong> {{financial_agent_name}} of {{financial_agent_city}}<br>
+        <strong>Phone:</strong> ____________________________<br>
+        <strong>Relationship:</strong> ____________________________
+    </div>
+    <p>as my true and lawful attorney-in-fact (Agent). If my Agent is unable or unwilling to act, I appoint as my first
+        Alternate Agent:</p>
+    <div class="box">
+        <strong>Alternate Agent:</strong> {{alternate_financial_agent}}<br>
+        <strong>Phone:</strong> ____________________________
+    </div>
+
+    <h2>2. Durability Clause</h2>
+    <p><strong>This Power of Attorney shall not be affected by subsequent incapacity of the principal.</strong> This
+        Power of Attorney is durable pursuant to California Probate Code § 4124 and shall remain in full force and
+        effect regardless of any future incapacity of the principal after the time of signing.</p>
+
+    <h2>3. Grant of Authority</h2>
+    <p>I grant my Agent full power and authority to act in my name, place and stead and in my behalf in connection with
+        the following, to the same extent as I could if personally present (initial each that applies, or initial ALL to
+        grant all powers):</p>
+    <ol type="A">
+        <li>____ <strong>Real Property Transactions</strong> — buy, sell, lease, encumber, exchange, transfer, and
+            manage real estate interests.</li>
+        <li>____ <strong>Tangible Personal Property Transactions</strong> — buy, sell, lease, exchange, and manage
+            personal property.</li>
+        <li>____ <strong>Stock and Bond Transactions</strong> — buy, sell, manage, and exercise rights in securities and
+            investment accounts.</li>
+        <li>____ <strong>Financial Institution Transactions</strong> — open, maintain, and close bank, savings, and
+            other financial accounts; write checks and make withdrawals.</li>
+        <li>____ <strong>Business Operating Transactions</strong> — manage, operate, buy, and sell business interests.
+        </li>
+        <li>____ <strong>Insurance and Annuity Transactions</strong> — manage, purchase, or cancel insurance and annuity
+            contracts.</li>
+        <li>____ <strong>Estate, Trust, Beneficiary Transactions</strong> — exercise rights and elections as a
+            beneficiary or nominee of any estate or trust.</li>
+        <li>____ <strong>Claims and Litigation</strong> — assert and pursue claims and litigation on my behalf.</li>
+        <li>____ <strong>Personal and Family Maintenance</strong> — make expenditures for my maintenance, education, and
+            support and that of my dependents.</li>
+        <li>____ <strong>Benefits from Governmental Programs</strong> — apply for and manage Social Security, Medicare,
+            Medi-Cal, veterans, and other governmental benefits.</li>
+        <li>____ <strong>Retirement Plan Transactions</strong> — manage contributions and distributions from retirement
+            accounts.</li>
+        <li>____ <strong>Tax Matters</strong> — prepare, sign, and file federal and state tax returns; receive tax
+            refunds.</li>
+        <li>____ <strong>Digital Asset Transactions</strong> — access, manage, and transfer digital assets pursuant to
+            Cal. Prob. Code §§ 870–884.</li>
+        <li>____ <strong>Gift-Making Power</strong> — make gifts on my behalf, not to exceed the annual federal gift tax
+            exclusion per recipient per year ($18,000 as of 2024, indexed annually), to any person the Agent deems
+            appropriate. <em>(This power must be specifically granted — Cal. Prob. Code § 4264.)</em></li>
+        <li>____ <strong>Trust Amendment / Revocation</strong> — amend or revoke any revocable trust I have created,
+            including the {{trust_name}}. <em>(This power must be specifically granted — Cal. Prob. Code § 4264.)</em>
+        </li>
+        <li>____ <strong>Beneficiary Designation Changes</strong> — change beneficiary designations on life insurance,
+            retirement accounts, or other accounts. <em>(This power must be specifically granted — Cal. Prob. Code §
+                4264.)</em></li>
+    </ol>
+
+    <p><em>Grant <strong>ALL</strong> of the above powers:</em><br>
+        Initial here if you want all the above powers: ____</p>
+
+    <h2>4. Agent Obligations</h2>
+    <p>The Agent shall act in good faith and in a fiduciary capacity for my benefit and shall not commingle the
+        principal's funds with personal funds. The Agent shall keep accurate records of all transactions taken pursuant
+        to this Power of Attorney.</p>
+
+    <h2>5. Reliance by Third Parties</h2>
+    <p>Third parties may rely on a copy of this Power of Attorney. No person who acts in good faith in reliance on this
+        Power of Attorney shall be liable to me or my estate. The Agent shall indemnify third parties acting in good
+        faith in reliance upon this Power of Attorney.</p>
+
+    <h2>6. Termination</h2>
+    <p>This Power of Attorney terminates upon: (a) my death; (b) my written revocation delivered to the Agent; or (c)
+        the date specified below (if any): _______________________.</p>
+
+    <!-- SIGNATURE -->
+    <div class="page-break">
+        <h2>7. Execution</h2>
+        <p>I sign my name to this Durable Power of Attorney on this the <strong>{{execution_day_ordinal}}</strong> day
+            of <strong>{{execution_month}}</strong>, <strong>{{execution_year}}</strong>, at <strong>{{execution_city}},
+                {{execution_state}}</strong>.</p>
+
+        <div style="margin-top:40px;">
+            <div class="sig-line"></div>
+            <div class="sig-label"><strong>{{grantor_name}}</strong>, Principal</div>
+        </div>
+
+        <h2>Certificate of Acknowledgment — Agent</h2>
+        <p>I, <strong>{{financial_agent_name}}</strong>, have read this Durable Power of Attorney and hereby accept this
+            appointment. I understand that I am responsible for acting in the best interest of
+            <strong>{{grantor_name}}</strong> and in the role of a fiduciary.</p>
+        <div style="margin-top:36px;">
+            <div class="sig-line"></div>
+            <div class="sig-label">{{financial_agent_name}}, Agent &nbsp;&nbsp; Date: ______________</div>
+        </div>
+
+        <div class="notary-box" style="margin-top:36px;">
+            <h3>ACKNOWLEDGMENT OF NOTARY PUBLIC</h3>
+            <p style="font-size:10pt;font-style:italic;">A notary public or other officer completing this certificate
+                verifies only the identity of the individual who signed the document to which this certificate is
+                attached, and not the truthfulness, accuracy, or validity of that document.</p>
+            <p><strong>STATE OF CALIFORNIA, COUNTY OF {{notary_county}}</strong></p>
+            <p>On _________________________, before me, _________________________, Notary Public, personally appeared
+                <strong>{{grantor_name}}</strong>, who proved to me on satisfactory evidence to be the person whose name
+                is subscribed to this instrument and acknowledged to me that they executed the same in their authorized
+                capacity.</p>
+            <p>I certify under PENALTY OF PERJURY under the laws of the State of California that the foregoing is true
+                and correct.</p>
+            <p>WITNESS my hand and official seal.</p>
+            <div style="margin-top:24px;">
+                <div class="sig-line"></div>
+                <div class="sig-label">Signature of Notary Public</div>
+                <br><br>
+                <div
+                    style="border:1px solid #333; width:140px; height:80px; display:inline-block; text-align:center; padding-top:30px; font-size:9pt; color:#888;">
+                    NOTARY SEAL</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

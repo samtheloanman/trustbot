@@ -1,0 +1,22 @@
+{
+  "name": "trustbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "handlebars": "^4.7.8",
+    "nodemailer": "^8.0.1",
+    "puppeteer": "^24.37.5"
+  }
+}

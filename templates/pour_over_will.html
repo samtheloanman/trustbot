@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pour-Over Will — {{grantor_name}}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap');
+
+        body {
+            font-family: 'EB Garamond', serif;
+            font-size: 12pt;
+            line-height: 1.7;
+            color: #111;
+        }
+
+        h1 {
+            font-size: 17pt;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .box {
+            border: 1px solid #555;
+            padding: 12px 18px;
+            margin: 14px 0;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #333;
+            display: inline-block;
+            width: 260px;
+            margin-top: 36px;
+        }
+
+        .sig-label {
+            font-size: 10pt;
+            margin-top: 4px;
+        }
+
+        .sig-pair {
+            display: flex;
+            gap: 60px;
+            margin: 24px 0;
+        }
+
+        .disclaimer {
+            font-size: 10pt;
+            font-style: italic;
+            background: #f7f7f7;
+            padding: 8px;
+            border-left: 3px solid #999;
+            margin: 10px 0;
+        }
+
+        .notary-box {
+            border: 1px solid #333;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .notary-box h3 {
+            text-align: center;
+            font-size: 12pt;
+            margin-top: 0;
+        }
+
+        ol {
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin: 8px 0;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Last Will and Testament</h1>
+    <h1 style="font-size:14pt;">(Pour-Over Will)</h1>
+    <div style="text-align:center; font-style:italic; margin-bottom:14px;">
+        State of {{execution_state}}
+    </div>
+
+    <div class="disclaimer">
+        <strong>PURPOSE OF THIS DOCUMENT:</strong> This Pour-Over Will is a companion document to the {{trust_name}}.
+        Its primary purpose is to ensure that any assets not transferred to the trust during your lifetime are "poured
+        over" into the trust upon your death, so that all assets are administered under a single, consistent plan.
+        Without this Will, assets outside the trust may be subject to California intestate succession rather than your
+        stated wishes.
+    </div>
+
+    <p>I, <strong>{{grantor_name}}</strong>, of {{grantor_city}}, {{grantor_state}}, declare this to be my Last Will and
+        Testament (Pour-Over Will), revoking all prior wills and codicils previously made by me.</p>
+
+    <h2>Article I — Identification</h2>
+    <ol>
+        <li>I am not married at the time of this Will's execution.
+            {{#if is_married}}<strong>Correction: I am married to {{spouse_name}}.</strong>{{/if}}</li>
+        <li>I make this Will freely and voluntarily, being of legal age and sound mind.</li>
+    </ol>
+
+    <h2>Article II — Debts and Expenses</h2>
+    <ol start="3">
+        <li>I direct my Personal Representative to pay all my legally enforceable debts, funeral expenses, and costs of
+            administration of my estate from the assets of my estate as soon as practicable after my death, subject to
+            any right I may have to direct otherwise.</li>
+    </ol>
+
+    <h2>Article III — Pour-Over Bequest</h2>
+    <ol start="4">
+        <li>I give, devise, and bequeath all of my property, real, personal, and mixed, of whatever nature and wherever
+            situated, that I own at my death and that has not been transferred to the <strong>{{trust_name}}</strong>
+            (the "Living Trust") during my lifetime, to the then-acting Trustee of the Living Trust to be held,
+            administered, and distributed in accordance with the provisions of that trust, including any amendments made
+            prior to my death.</li>
+
+        <li>If the Living Trust has been revoked before my death or if no trust exists at the time of my death, I direct
+            that my estate be distributed to <strong>{{#each beneficiaries}}{{this.name}} ({{this.share}}%){{#unless
+                @last}}, {{/unless}}{{/each}}</strong>, in the proportions indicated.</li>
+
+        <li>The Living Trust need not be in existence at the time I execute this Will. This Will incorporates by
+            reference the terms of the Living Trust as they exist at my death, pursuant to California Probate Code §
+            6300.</li>
+    </ol>
+
+    <h2>Article IV — Personal Representative</h2>
+    <ol start="7">
+        <li>I appoint <strong>{{successor_trustee_list}}</strong>, in the order listed, as Personal Representative(s) of
+            this Will. No bond shall be required of any Personal Representative.</li>
+
+        <li>My Personal Representative shall have all powers granted to personal representatives under California law,
+            including the Independent Administration of Estates Act (Cal. Prob. Code §§ 10400–10592), without the need
+            for court approval for ordinary estate transactions.</li>
+    </ol>
+
+    <h2>Article V — Guardian for Minor Children (if applicable)</h2>
+    <ol start="9">
+        <li>If I have minor children at the time of my death, I nominate <strong>{{successor_trustee_list}}</strong> as
+            guardian(s) of the person and estate of any such minor children, in the order listed. No bond shall be
+            required of any guardian.</li>
+    </ol>
+
+    <h2>Article VI — No-Contest Clause</h2>
+    <ol start="10">
+        <li>If any beneficiary under this Will contests or attacks this Will or any of its provisions, any share or
+            interest in my estate given to the contesting beneficiary under this Will is revoked, unless the contest is
+            brought in good faith and upon probable cause (Cal. Prob. Code § 21311).</li>
+    </ol>
+
+    <h2>Article VII — Governing Law</h2>
+    <ol start="11">
+        <li>This Will shall be governed, construed, and administered in accordance with the laws of the State of
+            {{execution_state}}.</li>
+    </ol>
+
+    <!-- SIGNATURE -->
+    <div class="page-break">
+        <h2>Attestation and Signature</h2>
+        <p>I, <strong>{{grantor_name}}</strong>, the Testator, sign my name to this instrument this
+            <strong>{{execution_day_ordinal}}</strong> day of <strong>{{execution_month}}</strong>,
+            <strong>{{execution_year}}</strong>, at <strong>{{execution_city}}, {{execution_state}}</strong>, and being
+            first duly sworn, declare to the undersigned authority that I sign and execute this instrument as my Last
+            Will and that I sign it willingly, that I execute it as my free and voluntary act for the purposes therein
+            expressed, and that I am eighteen years of age or older, of sound mind, and under no constraint or undue
+            influence.</p>
+
+        <div style="margin-top:36px;">
+            <div class="sig-line"></div>
+            <div class="sig-label"><strong>{{grantor_name}}</strong>, Testator</div>
+        </div>
+
+        <p style="margin-top:30px;">We, the witnesses, sign our names to this instrument and being first duly sworn,
+            declare to the undersigned authority that the Testator signs and executes this instrument as their Last Will
+            and that they sign it willingly, and that each of us, in the presence and hearing of the Testator, hereby
+            signs this Will as witness to the Testator's signing, and that to the best of our knowledge the Testator is
+            eighteen years of age or older, of sound mind, and under no constraint or undue influence.</p>
+
+        <div class="sig-pair">
+            <div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #1 Signature — Date: ______________</div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #1 Printed Name</div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #1 Address</div>
+            </div>
+            <div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #2 Signature — Date: ______________</div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #2 Printed Name</div>
+                <div class="sig-line"></div>
+                <div class="sig-label">Witness #2 Address</div>
+            </div>
+        </div>
+
+        <div class="notary-box">
+            <h3>SELF-PROVING AFFIDAVIT (Optional but Recommended)</h3>
+            <p style="font-size:10pt; font-style:italic;">A self-proving affidavit allows this Will to be admitted to
+                probate without requiring the witnesses to testify. Cal. Prob. Code § 8220.</p>
+            <p><strong>STATE OF CALIFORNIA, COUNTY OF {{notary_county}}</strong></p>
+            <p>We, <strong>{{grantor_name}}</strong> (Testator), and the witnesses whose names are signed to the
+                attached instrument, being duly sworn, declare to the undersigned officer that the Testator signed and
+                executed the instrument as their Will and that they had signed willingly, and that the Testator executed
+                it as their free and voluntary act; and that each of the witnesses, in the presence and hearing of the
+                Testator, signed the Will as witness.</p>
+
+            <div style="margin-top:24px;">
+                <div class="sig-line"></div>
+                <div class="sig-label">{{grantor_name}}, Testator</div>
+            </div>
+            <div class="sig-pair" style="margin-top:20px;">
+                <div>
+                    <div class="sig-line" style="width:200px;"></div>
+                    <div class="sig-label">Witness #1</div>
+                </div>
+                <div>
+                    <div class="sig-line" style="width:200px;"></div>
+                    <div class="sig-label">Witness #2</div>
+                </div>
+            </div>
+            <p style="margin-top:20px;">Subscribed, sworn to and acknowledged before me by
+                <strong>{{grantor_name}}</strong>, the Testator, and subscribed and sworn to before me by the witnesses,
+                on ________________________.</p>
+            <div style="margin-top:20px;">
+                <div class="sig-line"></div>
+                <div class="sig-label">Signature of Notary Public</div>
+                <br>
+                <div
+                    style="border:1px solid #333; width:140px; height:80px; display:inline-block; text-align:center; padding-top:30px; font-size:9pt; color:#888;">
+                    NOTARY SEAL</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

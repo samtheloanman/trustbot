@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{trust_name}}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Lato:wght@400;700&display=swap');
+  body { font-family: 'EB Garamond', serif; font-size: 12pt; line-height: 1.7; color: #111; margin: 0; padding: 0; }
+  h1 { font-size: 18pt; text-align: center; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+  h2 { font-size: 13pt; font-weight: 600; margin-top: 22px; margin-bottom: 6px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+  .subtitle { text-align: center; font-style: italic; margin-bottom: 20px; font-size: 11pt; }
+  .disclaimer { background: #f8f8f8; border-left: 3px solid #888; padding: 8px 12px; font-size: 10pt; font-style: italic; margin-bottom: 20px; }
+  ol { padding-left: 24px; } li { margin-bottom: 6px; }
+  .signature-block { margin-top: 48px; }
+  .sig-line { border-bottom: 1px solid #333; display: inline-block; width: 280px; margin-top: 36px; vertical-align: bottom; }
+  .sig-label { font-size: 10pt; margin-top: 4px; }
+  .sig-pair { display: flex; gap: 60px; margin-bottom: 36px; }
+  .notary-box { border: 1px solid #333; padding: 20px; margin-top: 30px; }
+  .notary-box h3 { text-align: center; font-size: 12pt; margin-top: 0; }
+  .schedule { margin-top: 30px; }
+  .page-break { page-break-before: always; }
+  p { margin: 8px 0; }
+  .section-num { font-weight: bold; }
+  .disclaimer-strong { font-weight: bold; font-style: normal; }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { border: 1px solid #ccc; padding: 6px 10px; font-size: 11pt; }
+  th { background: #f0f0f0; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>{{trust_name}}</h1>
+<div class="subtitle">A California Revocable Living Trust<br>
+  Established pursuant to California Probate Code §§ 15000–18000</div>
+
+<div class="disclaimer">
+  <span class="disclaimer-strong">IMPORTANT NOTICE:</span> This document is a legal instrument. 
+  Execute before a Notary Public. Consider review by a licensed California estate planning attorney.
+  A notary public or other officer completing this certificate verifies only the identity of the individual
+  who signed the document to which this certificate is attached, and not the truthfulness, accuracy, or validity of that document.
+</div>
+
+<!-- DECLARATION -->
+<p>I, <strong>{{grantor_name}}</strong>, presently of {{grantor_city}}, {{grantor_state}} (the "<strong>Grantor</strong>"), declare and make this Revocable Living Trust (the "<strong>Living Trust</strong>"). This Living Trust will be known as the <strong>{{trust_name}}</strong>. This instrument is executed and shall be administered and construed in accordance with the laws of the State of California, including the California Uniform Trust Law (Probate Code §§ 15000 et seq.) and shall be modified or revoked in accordance with California Probate Code §§ 15401–15402.</p>
+
+<h2>Article I — Trust Purpose</h2>
+<ol start="1">
+  <li>This Living Trust is created for the benefit of the Beneficiaries to ensure they are well provided for after the death of the Grantor. During the lifetime of the Grantor, the interests of the Grantor will be considered primary and superior to the interests of the Beneficiaries. The primary asset management goal for this Living Trust is the protection and preservation of the value of the Trust Property. The secondary goal is to generate income and growth at a reasonable risk consistent with the prudent investor standard (Cal. Prob. Code § 16047).</li>
+</ol>
+
+<h2>Article II — Trustee</h2>
+<ol start="2">
+  <li>During the lifetime of the Grantor, and while the Grantor is not Incapacitated (as defined herein), the Grantor, <strong>{{grantor_name}}</strong>, will serve as the Primary Trustee and Acting Trustee of this Living Trust.</li>
+
+  <li>Upon the death of, or during the Incapacity of, the Grantor, <strong>{{successor_trustee_list}}</strong> (the "<strong>Successor Trustee(s)</strong>") will serve as the Acting Trustee(s) of this Living Trust, in the order listed. If the Grantor should recover such that they are no longer considered Incapacitated, the Grantor will resume control of this Living Trust.</li>
+
+  <li><strong>Determination of Incapacity.</strong> For purposes of this Living Trust, Incapacity shall be deemed to exist upon the written certification of two (2) licensed physicians that the Grantor is unable to manage their own financial affairs by reason of physical or mental disability. The Acting Trustee may rely conclusively on such written certifications without liability for any actions taken in good faith in reliance thereon. If no such certification exists, the Grantor shall be presumed capable and in control of this Living Trust.</li>
+</ol>
+
+<h2>Article III — Beneficiaries</h2>
+<ol start="5">
+  <li>Upon the death of the Grantor, the following individual(s) will comprise the Beneficiaries of this Living Trust:
+    <ol type="a">
+      {{#each beneficiaries}}
+      <li><strong>{{this.name}}</strong> of {{this.city}}, {{this.state}};</li>
+      {{/each}}
+      <li>Any heir or issue of those Beneficiaries that is entitled to a benefit under this Living Trust in the place of any then-deceased Beneficiary (per stirpes distribution).</li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Article IV — Community Property</h2>
+<ol start="6">
+  {{#if is_married}}
+  <li>The Grantor is married to <strong>{{spouse_name}}</strong>. Any community property of the Grantor and spouse transferred into this Living Trust retains its character as community property and shall be administered as such. The Grantor's separate property shall be separately identified and administered. Nothing in this Living Trust shall be construed to convert separate property into community property or vice versa. Upon the death of the Grantor, the Grantor's one-half interest in community property shall be subject to the terms of this Living Trust; the surviving spouse retains their independent one-half community property interest free of this trust.</li>
+  {{else}}
+  <li>The Grantor is not married at the time of execution of this Living Trust. All property assigned to this Living Trust is the Grantor's separate property.</li>
+  {{/if}}
+</ol>
+
+<h2>Article V — Ownership of Property</h2>
+<ol start="7">
+  <li>The Grantor presently owns property (the "<strong>Property</strong>" or "<strong>Trust Property</strong>") as described in Schedule A, attached hereto and incorporated by reference.</li>
+
+  <li><strong>{{grantor_name}}</strong>, as Grantor, has or will assign, convey and deliver all rights, title and interest in and to the Property as described in Schedule A of this document as a gift and without consideration, to be held by this Living Trust. The Grantor intends, to the maximum extent permitted by applicable law, to fund this Trust with all assets described in Schedule A and any after-acquired property.</li>
+
+  <li><strong>Digital Assets.</strong> This Living Trust shall include all of the Grantor's digital assets, including but not limited to: financial accounts held online, cryptocurrency and digital currency holdings, domain names, digital files, email accounts, social media accounts, and any other electronically stored information or online accounts. The Acting Trustee is granted authority to access, manage, transfer, and close such accounts pursuant to applicable law, including the Revised Uniform Fiduciary Access to Digital Assets Act as adopted in California (Prob. Code §§ 870–884). The Grantor authorizes the Acting Trustee to use any online tools designated by service providers for this purpose.</li>
+</ol>
+
+<h2>Article VI — Amendment During Grantor's Lifetime</h2>
+<ol start="10">
+  <li>At any time during the lifetime of the Grantor and while the Grantor is not Incapacitated, the Grantor may alter or amend this Living Trust by delivery to the Successor Trustee of a written instrument signed by the Grantor. This Living Trust may also be amended pursuant to the procedures set forth in California Probate Code § 15402 (by signed writing delivered to the trustee). Amendments may include, but are not limited to:
+    <ol type="a">
+      <li>The Grantor may change the identity of the Grantor, Primary Trustee, Successor Trustee, or Beneficiaries.</li>
+      <li>The Grantor may add or withdraw property from this Living Trust.</li>
+    </ol>
+  </li>
+  <li>This Living Trust may not be amended after the death of the Grantor. Pursuant to <em>Haggerty v. Thornton</em> (2024) 15 Cal.5th 729, revocation procedures under Probate Code § 15401 may also be used as an alternative method of modification unless this Trust expressly restricts such use.</li>
+</ol>
+
+<h2>Article VII — Revocation During Grantor's Lifetime</h2>
+<ol start="12">
+  <li>At any time during the lifetime of the Grantor and while the Grantor is not Incapacitated, the Grantor may revoke this Living Trust in its entirety by delivery to the Successor Trustee of a written instrument signed by the Grantor (Cal. Prob. Code § 15401). In the event of such revocation, the remaining Property will revert to the Grantor after all debts and expenses attributable to the Living Trust have been paid.</li>
+  <li>This Living Trust may not be revoked after the death of the Grantor.</li>
+</ol>
+
+<h2>Article VIII — Distributions During the Lifetime of the Grantor</h2>
+<ol start="14">
+  <li>During the lifetime of the Grantor and while the Grantor is not Incapacitated, the Acting Trustee will distribute as much of the income and principal of the Living Trust to the Grantor as the Grantor may request.</li>
+  <li>While the Grantor is Incapacitated, the Acting Trustee may withhold or make payments out of the resources of this Living Trust of any amount that the Acting Trustee in their sole judgment deems appropriate for the maintenance, health, education, comfort and welfare of the Grantor, in that order of priority.</li>
+</ol>
+
+<h2>Article IX — Distributions Upon Death of the Grantor</h2>
+<ol start="16">
+  <li>Upon the death of the Grantor, and after resolving all applicable legal debts, taxes, and obligations of the Grantor, the Acting Trustee will expeditiously act to distribute the remaining Property as directed in this Article.</li>
+
+  <li>After resolving all applicable legal debts and obligations, the Acting Trustee will distribute the remaining Trust Property to the Beneficiaries as follows:
+    <ol type="a">
+      {{#each beneficiaries}}
+      <li><strong>{{this.share}}%</strong> to <strong>{{this.name}}</strong> of {{this.city}}, {{this.state}}.</li>
+      {{/each}}
+    </ol>
+    (the "<strong>Final Distribution</strong>")
+  </li>
+
+  <li><strong>Minor Beneficiaries.</strong> Where a Beneficiary is under the age of 23 years at the time of the Final Distribution, the Acting Trustee will hold that Share in a separate trust for that Beneficiary under the same terms and conditions as this Living Trust, and will keep that Share invested, paying income or capital as the Acting Trustee considers advisable for the maintenance, education, advancement or benefit of that Beneficiary until that Beneficiary reaches age 23, whereupon the Acting Trustee will pay or transfer the rest and residue of that Share to that Beneficiary.</li>
+
+  <li><strong>Adult Dependent Beneficiaries.</strong> Where a Beneficiary is an Adult Dependent Beneficiary at the time of the Final Distribution, the Acting Trustee may, at their sole discretion: (a) continue to hold the Share in a separate trust; or (b) pay or transfer all capital and assets to any parent, custodian or guardian of that beneficiary, whose receipt shall discharge the Acting Trustee.</li>
+
+  <li><strong>Per Stirpes Fallback.</strong> If any named Beneficiary does not survive the Grantor by at least thirty (30) days but leaves an heir or issue who survives the Grantor by at least thirty (30) days, the Share designated for that Beneficiary shall be distributed per stirpes among those surviving heirs or issue.</li>
+
+  <li><strong>Failure of All Beneficiaries.</strong> If all residual Beneficiaries fail to survive the Grantor by at least thirty (30) days and leave no surviving heirs or issue, then all remaining property shall revert to the estate of the Grantor.</li>
+
+  <li><strong>Encumbrances.</strong> Any real or personal property distributed subject to a mortgage, encumbrance or lien shall be taken by the Beneficiary subject to that encumbrance; the Beneficiary shall not be entitled to have the encumbrance paid out from the remaining Trust assets.</li>
+</ol>
+
+<h2>Article X — No-Contest Clause (In Terrorem)</h2>
+<ol start="22">
+  <li>If any Beneficiary, heir, or other party brings a legal action or proceeding to contest, challenge, or invalidate this Living Trust, or any provision thereof, or opposes or objects to any act of the Acting Trustee taken in accordance with this Living Trust, then that person's interest under this Living Trust shall be reduced to zero, and such person shall be treated as having predeceased the Grantor without issue, <em>unless</em> the action is brought in good faith and upon probable cause (Cal. Prob. Code § 21311).</li>
+</ol>
+
+<h2>Article XI — Trustee Bond, Liability, Death and Resignation</h2>
+<ol start="23">
+  <li><strong>Bond.</strong> Subject to California law, no bond or security of any kind will be required of any Trustee appointed in this Living Trust.</li>
+
+  <li><strong>Liability.</strong> The Trustee will not be liable to this Living Trust, the Grantor, or to the Beneficiaries for any act or failure to act resulting in loss or harm except in the case of gross negligence, willful misconduct, or reckless indifference to the purposes of the Trust. A Trustee will only be responsible for their own acts.</li>
+
+  <li><strong>Resignation.</strong> A Trustee may resign at any time for any reason upon at least thirty (30) days' written notice to the Grantor (if alive), to any remaining Trustee, and to the Qualified Beneficiaries. If a Trustee dies, that Trustee ceases to be Trustee as of the date of death.</li>
+
+  <li><strong>Removal.</strong> After the death or incapacity of the Grantor, the Qualified Beneficiaries may, by unanimous vote, remove a Trustee for any reason. A Trustee may also be removed by a court of competent jurisdiction (Cal. Prob. Code § 15642).</li>
+
+  <li><strong>Replacement.</strong> Where the Grantor is living and capable, a replacement Trustee may be appointed by the Grantor. Where the Grantor is deceased or Incapacitated, a replacement may be appointed by majority vote of the remaining Acting Trustees, or, if no Trustees remain, by unanimous vote of the Qualified Beneficiaries.</li>
+</ol>
+
+<h2>Article XII — Trustee Powers</h2>
+<ol start="28">
+  <li>Powers granted to an Acting Trustee include, but are not limited to the following:
+    <ol type="a">
+      <li>Manage the Property as if the Trustee were the owner;</li>
+      <li>After Grantor's death, appoint co-Trustees where reasonable;</li>
+      <li>Employ and rely on legal counsel, accountants, and investment advisors;</li>
+      <li>Retain, exchange, insure, repair, improve, sell or dispose of personal property;</li>
+      <li>Invest, manage, lease, rent, exchange, mortgage, sell, or dispose of real property;</li>
+      <li>Maintain, dissolve, change or sell any business within the Trust;</li>
+      <li>Purchase, maintain, convert and liquidate investments or securities;</li>
+      <li>Open or close bank or investment accounts;</li>
+      <li>Invest and reinvest Trust assets at reasonable risk;</li>
+      <li>Hold un-invested cash and unproductive property where reasonable;</li>
+      <li>Lend funds where adequately secured and in the best interest of the Trust;</li>
+      <li>Borrow funds and mortgage Trust assets where reasonable;</li>
+      <li>Maintain, settle, abandon, sue or defend any claim;</li>
+      <li>Make the Final Distribution in any combination of cash and property;</li>
+      <li>Access, manage, and transfer digital assets pursuant to Cal. Prob. Code §§ 870–884.</li>
+    </ol>
+  </li>
+  <li>All decisions of the Acting Trustee made in good faith and in accordance with the prudent investor standard (Cal. Prob. Code § 16047) shall be final and binding on all parties.</li>
+</ol>
+
+<h2>Article XIII — Trustee Compensation and Expenses</h2>
+<ol start="30">
+  <li>A Trustee who is not a Beneficiary of this Living Trust will receive reasonable compensation, not to exceed the greater of (a) $150 per hour or (b) 1% of the fair market value of Trust assets per year, to be adjusted annually by the Consumer Price Index, out of the resources of this Living Trust for services rendered. A Trustee who is also a Beneficiary under this Living Trust will serve without compensation.</li>
+  <li>A Trustee is entitled to be reimbursed out of the income and property of this Living Trust for all reasonable expenses, including interest where appropriate, incurred in the management of this Living Trust.</li>
+</ol>
+
+<h2>Article XIV — Spendthrift Clause</h2>
+<ol start="32">
+  <li>No Beneficiary of this Living Trust will have the power to transfer, sell, assign, pledge, or otherwise encumber any assets or property held by this Living Trust prior to the Final Distribution by the Acting Trustee. The right of distribution held by any Beneficiary under this Living Trust will not be subject to judicial encumbrance, attachment, execution, garnishment, or other legal process prior to the Final Distribution by the Acting Trustee (Cal. Prob. Code § 15300 et seq.).</li>
+</ol>
+
+<h2>Article XV — Outstanding Debts, Taxes and Funeral Expenses</h2>
+<ol start="33">
+  <li>After the death of the Grantor, and prior to the Final Distribution, the Acting Trustee will pay all legally enforceable debts and taxes attributable to the Grantor's estate out of the assets of this Living Trust.</li>
+  <li>After the death of the Grantor, the Acting Trustee will pay all reasonable funeral expenses, burial expenses, and expenses related to the final illness of the Grantor out of the assets of this Living Trust.</li>
+</ol>
+
+<h2>Article XVI — Tax Identification and Homestead</h2>
+<ol start="35">
+  <li>For tax purposes, this Living Trust will be identified by the Grantor's Social Security Number during the lifetime of the Grantor. After the death of the Grantor, the Acting Trustee will apply to the IRS for any necessary tax identification numbers (EIN).</li>
+  <li>If the principal residence of the Grantor is held within this Living Trust, the Grantor maintains the right to possess and inhabit the residence without rent and charge-free, for the duration of their lifetime. This provision is intended to preserve the Grantor's eligibility for any California homestead tax exemption (including Proposition 19 benefits, where applicable) that the Grantor would otherwise qualify for as an owner-occupant.</li>
+</ol>
+
+<h2>Article XVII — Pet Care Provision</h2>
+<ol start="37">
+  <li>If the Grantor owns domestic animals at the time of death, the Acting Trustee may, in their discretion, allocate funds from the Trust for the care, veterinary treatment, and placement of such animals with a caretaker of the Acting Trustee's choosing. Any unused funds designated for animal care shall revert to the residuary Trust estate upon the death of such animals.</li>
+</ol>
+
+<h2>Article XVIII — Termination of Trust</h2>
+<ol start="38">
+  <li>This Living Trust will terminate where the Property of this Living Trust is exhausted through distributions.</li>
+  <li>If the aggregate fair market value of the Trust Property falls below <strong>$184,500</strong> (the current California simplified probate threshold as of 2024, Cal. Prob. Code § 13100, adjusted periodically), the Acting Trustee may terminate this Living Trust after providing written notice to the Qualified Beneficiaries. Upon such termination, the Acting Trustee will distribute the Property consistent with the distributions provisions of this Living Trust.</li>
+</ol>
+
+<h2>Article XIX — Abstract of Trust</h2>
+<ol start="40">
+  <li>The Acting Trustee may execute an Abstract of Trust (Cal. Prob. Code § 18100.5) and may present the Abstract to financial institutions as proof of this Living Trust's existence. The Abstract shall not contain full details of property holdings or name all Beneficiaries. Any person who relies in good faith on the Abstract of Trust shall be held harmless.</li>
+</ol>
+
+<h2>Article XX — Governing Law and Severability</h2>
+<ol start="41">
+  <li>This Living Trust will be governed, administered, and construed in accordance with the laws of the State of California, including the California Uniform Trust Law (Prob. Code §§ 15000 et seq.).</li>
+  <li>If any provision of this Living Trust is deemed unenforceable by any court of competent jurisdiction, the remaining provisions will remain in full force and effect.</li>
+</ol>
+
+<h2>Article XXI — Definitions</h2>
+<ol start="43">
+  <li>For the purpose of this Living Trust the following definitions apply:
+    <ol type="a">
+      <li><strong>"Acting Trustee"</strong> means any Trustee who is currently serving as a Trustee of this Living Trust.</li>
+      <li><strong>"Adult Dependent Beneficiary"</strong> means an adult beneficiary who is unable to manage their own financial affairs by reason of mental or other disability.</li>
+      <li><strong>"Age of Majority"</strong> means 18 years of age, or the age of majority in the jurisdiction where a beneficiary ordinarily resides.</li>
+      <li><strong>"Incapacity" or "Incapacitated"</strong> means when a person is unable to manage their own financial affairs by reason of physical or mental disability, as certified in writing by two (2) licensed physicians.</li>
+      <li><strong>"Minor Beneficiary"</strong> means a beneficiary who is under the legal Age of Majority.</li>
+      <li><strong>"Qualified Beneficiary"</strong> means any beneficiary who, at the date of determination, is entitled to a benefit of this Living Trust or could receive a distribution of Trust principal in the Trustee's discretion.</li>
+      <li><strong>"Trustee"</strong> means any Primary Trustee or Successor Trustee, as well as any replacement or additional Trustee appointed for this Living Trust.</li>
+      <li><strong>"Digital Assets"</strong> means electronic records in which an individual has a right or interest, as defined in Cal. Prob. Code § 871.</li>
+    </ol>
+  </li>
+</ol>
+
+<!-- SIGNATURE BLOCK -->
+<div class="signature-block page-break">
+  <h2>Execution</h2>
+  <p>IN WITNESS WHEREOF, the party hereto has signed their name on this the <strong>{{execution_day_ordinal}}</strong> day of <strong>{{execution_month}}</strong>, <strong>{{execution_year}}</strong>, in <strong>{{execution_city}}, {{execution_state}}</strong>, declaring and publishing this instrument as the Grantor's Revocable Living Trust, in the presence of the undersigned witnesses, who witnessed and subscribed this Living Trust in the presence of the party hereto.</p>
+
+  <div style="margin-top:48px;">
+    <div class="sig-line"></div><br>
+    <div class="sig-label"><strong>{{grantor_name}}</strong>, Grantor and Primary Trustee</div>
+    <div class="sig-label">Date: _________________________________</div>
+  </div>
+
+  <p style="margin-top: 36px;">SIGNED AND DECLARED by the above party on this the {{execution_day_ordinal}} day of {{execution_month}}, {{execution_year}}, to be the Grantor's Revocable Living Trust, in our presence, in {{execution_city}}, {{execution_state}}, all being present at the same time, and we have signed our names as witnesses.</p>
+
+  <div class="sig-pair">
+    <div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #1 Signature</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #1 Name (Print)</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #1 Street Address</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #1 City, State</div>
+    </div>
+    <div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #2 Signature</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #2 Name (Print)</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #2 Street Address</div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Witness #2 City, State</div>
+    </div>
+  </div>
+
+  <!-- NOTARY ACKNOWLEDGMENT -->
+  <div class="notary-box">
+    <h3>ACKNOWLEDGMENT OF NOTARY PUBLIC</h3>
+    <p style="font-size:10pt;font-style:italic;">A notary public or other officer completing this certificate verifies only the identity of the individual who signed the document to which this certificate is attached, and not the truthfulness, accuracy, or validity of that document.</p>
+    <p><strong>STATE OF CALIFORNIA</strong><br>
+    <strong>COUNTY OF {{notary_county}}</strong></p>
+    <p>On _________________________, before me, _________________________, Notary Public, personally appeared <strong>{{grantor_name}}</strong>, who proved to me on the basis of satisfactory evidence to be the person whose name is subscribed to the within instrument and acknowledged to me that they executed the same in their authorized capacity, and that by their signature on the instrument, the person or the entity upon behalf of which the person acted, executed the instrument.</p>
+    <p>I certify under PENALTY OF PERJURY under the laws of the State of California that the foregoing paragraph is true and correct.</p>
+    <p>WITNESS my hand and official seal.</p>
+    <div style="margin-top:36px;">
+      <div class="sig-line"></div>
+      <div class="sig-label">Signature of Notary Public</div>
+      <br><br>
+      <div style="border:1px solid #333; width:160px; height:80px; display:inline-block; vertical-align:top; text-align:center; padding-top:30px; font-size:9pt; color:#888;">NOTARY SEAL</div>
+    </div>
+    <p style="margin-top:20px;"><strong>Commission #:</strong> ___________________________ &nbsp;&nbsp; <strong>Expires:</strong> ___________________________</p>
+  </div>
+</div>
+
+<!-- SCHEDULE A -->
+<div class="page-break schedule">
+  <h1 style="font-size:16pt;">Schedule A</h1>
+  <h2>Trust Property</h2>
+  <p>The Grantor, <strong>{{grantor_name}}</strong>, assigns, conveys and delivers to the <strong>{{trust_name}}</strong>, all of the rights, title and interest, tangible or intangible, to the following properties, real or personal:</p>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Description of Property</th><th>APN / Account # (if applicable)</th><th>Estimated Value</th></tr>
+    </thead>
+    <tbody>
+      {{#each properties}}
+      <tr>
+        <td>{{add @index 1}}</td>
+        <td>{{this.description}}</td>
+        <td>{{this.apn}}</td>
+        <td>{{this.value}}</td>
+      </tr>
+      {{else}}
+      <tr><td colspan="4" style="text-align:center; font-style:italic;">To be completed upon execution</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <br>
+  <p>Signed by the Grantor on ________________________, {{execution_year}}:</p>
+  <div class="sig-line"></div>
+  <div class="sig-label">{{grantor_name}}, Grantor</div>
+</div>
+
+</body>
+</html>
