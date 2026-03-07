@@ -24,6 +24,16 @@ Handlebars.registerHelper('totalShares', (beneficiaries) => {
 });
 
 /**
+ * Parse JSON safely (handles string or array/object input)
+ */
+function safeJSON(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'object') return val;
+    try { return JSON.parse(val); } catch { return []; }
+}
+
+/**
  * Prepare and enrich form data before injecting into templates
  */
 function prepareData(raw) {
@@ -35,27 +45,33 @@ function prepareData(raw) {
     const v = dayNum % 100;
     const daySuffix = s[(v - 20) % 10] || s[v] || s[0];
 
-    // Parse beneficiaries (may come as arrays from form or JSON)
-    let beneficiaries = [];
-    if (raw.beneficiaries) {
-        // Sent as JSON string from form
-        try { beneficiaries = JSON.parse(raw.beneficiaries); } catch (e) { beneficiaries = []; }
-    } else if (Array.isArray(raw.beneficiary_name)) {
+    // Parse beneficiaries
+    let beneficiaries = safeJSON(raw.beneficiaries);
+    if (!Array.isArray(beneficiaries)) beneficiaries = [];
+
+    // Legacy format support
+    if (beneficiaries.length === 0 && Array.isArray(raw.beneficiary_name)) {
         raw.beneficiary_name.forEach((name, i) => {
             if (name) beneficiaries.push({
                 name,
                 city: (raw.beneficiary_city || [])[i] || '',
                 state: (raw.beneficiary_state || [])[i] || 'California',
                 share: (raw.beneficiary_share || [])[i] || '0',
+                relationship: '',
+                alternate: '',
+                rank: 'A',
             });
         });
     }
 
     // Parse properties (Schedule A)
-    let properties = [];
-    if (raw.properties) {
-        try { properties = JSON.parse(raw.properties); } catch (e) { properties = []; }
-    }
+    let properties = safeJSON(raw.properties);
+
+    // Parse children
+    let children = safeJSON(raw.children);
+
+    // Parse gifts
+    let gifts = safeJSON(raw.gifts);
 
     // Parse successor trustees
     const successorTrustees = [];
@@ -64,44 +80,154 @@ function prepareData(raw) {
         if (name) {
             successorTrustees.push({
                 name,
+                address: raw[`successor_trustee_${i}_address`] || '',
                 city: raw[`successor_trustee_${i}_city`] || '',
                 state: raw[`successor_trustee_${i}_state`] || 'California',
+                zip: raw[`successor_trustee_${i}_zip`] || '',
+                phone: raw[`successor_trustee_${i}_phone`] || '',
             });
         }
     }
 
-    const isMarried = raw.marital_status === 'married';
+    // Parse guardians
+    const guardians = [];
+    for (let i = 1; i <= 2; i++) {
+        const name = raw[`guardian_${i}_name`];
+        if (name) {
+            guardians.push({
+                name,
+                address: raw[`guardian_${i}_address`] || '',
+                city: raw[`guardian_${i}_city`] || '',
+                state: raw[`guardian_${i}_state`] || 'California',
+                zip: raw[`guardian_${i}_zip`] || '',
+                phone: raw[`guardian_${i}_phone`] || '',
+            });
+        }
+    }
+
+    // Parse custodians
+    const custodians = [];
+    for (let i = 1; i <= 2; i++) {
+        const name = raw[`custodian_${i}_name`];
+        if (name) {
+            custodians.push({
+                name,
+                address: raw[`custodian_${i}_address`] || '',
+                city: raw[`custodian_${i}_city`] || '',
+                state: raw[`custodian_${i}_state`] || 'California',
+                zip: raw[`custodian_${i}_zip`] || '',
+                phone: raw[`custodian_${i}_phone`] || '',
+            });
+        }
+    }
+
+    // Parse healthcare agents
+    const healthcareAgents = [];
+    const haNames = [raw.healthcare_agent_name, raw.alternate_healthcare_agent, raw.healthcare_agent_3_name];
+    for (let i = 0; i < 3; i++) {
+        if (haNames[i]) {
+            const prefix = i === 0 ? 'healthcare_agent_1' : i === 1 ? 'healthcare_agent_2' : 'healthcare_agent_3';
+            healthcareAgents.push({
+                name: haNames[i],
+                gender: raw[`${prefix}_gender`] || '',
+                address: raw[`${prefix}_address`] || '',
+                city: raw[`${prefix}_city`] || (i === 0 ? raw.healthcare_agent_city || '' : ''),
+                state: raw[`${prefix}_state`] || 'California',
+                zip: raw[`${prefix}_zip`] || '',
+                phone: raw[`${prefix}_phone`] || '',
+            });
+        }
+    }
+
+    // Parse financial agents
+    const financialAgents = [];
+    const faNames = [raw.financial_agent_name, raw.alternate_financial_agent, raw.financial_agent_3_name];
+    for (let i = 0; i < 3; i++) {
+        if (faNames[i]) {
+            const prefix = i === 0 ? 'financial_agent_1' : i === 1 ? 'financial_agent_2' : 'financial_agent_3';
+            financialAgents.push({
+                name: faNames[i],
+                gender: raw[`${prefix}_gender`] || '',
+                address: raw[`${prefix}_address`] || '',
+                city: raw[`${prefix}_city`] || (i === 0 ? raw.financial_agent_city || '' : ''),
+                state: raw[`${prefix}_state`] || 'California',
+                zip: raw[`${prefix}_zip`] || '',
+                phone: raw[`${prefix}_phone`] || '',
+            });
+        }
+    }
+
+    const isMarried = raw.marital_status === 'married' || raw.marital_status === 'legally_separated';
 
     return {
-        // Grantor
+        // Grantor (expanded)
         grantor_name: raw.grantor_name || '',
+        grantor_gender: raw.grantor_gender || '',
+        grantor_address: raw.grantor_address || '',
         grantor_city: raw.grantor_city || '',
         grantor_state: raw.grantor_state || 'California',
+        grantor_zip: raw.grantor_zip || '',
+        grantor_area_code: raw.grantor_area_code || '',
+        grantor_phone: raw.grantor_phone || '',
+        grantor_email: raw.grantor_email || '',
+        grantor_full_address: [raw.grantor_address, raw.grantor_city, raw.grantor_state, raw.grantor_zip].filter(Boolean).join(', '),
+
         // Trust
         trust_name: raw.trust_name || `The ${raw.grantor_name} Revocable Living Trust`,
+
         // Trustees
         grantor_is_primary_trustee: true,
         successor_trustees: successorTrustees,
         successor_trustee_list: successorTrustees.map(t => `${t.name} of ${t.city}, ${t.state}`).join(' and '),
-        // Beneficiaries
+
+        // Children
+        children,
+        has_children: children.length > 0,
+        has_minor_children: children.some(c => c.is_minor),
+
+        // Guardians
+        guardians,
+        has_guardians: raw.has_guardians === 'yes' && guardians.length > 0,
+
+        // Beneficiaries (expanded)
         beneficiaries,
+
+        // Specific gifts
+        gifts,
+        has_gifts: gifts.length > 0,
+
+        // Custodians
+        custodians,
+        has_custodians: custodians.length > 0,
+        custodian_legal_age: raw.custodian_legal_age || '18',
+
         // Properties
         properties,
+
         // Marital
         is_married: isMarried,
+        marital_status: raw.marital_status || 'single',
         spouse_name: raw.spouse_name || '',
-        // Healthcare directive
+
+        // Healthcare directive (expanded agents)
+        healthcare_agents: healthcareAgents,
         healthcare_agent_name: raw.healthcare_agent_name || (successorTrustees[0] ? successorTrustees[0].name : ''),
-        healthcare_agent_city: raw.healthcare_agent_city || (successorTrustees[0] ? successorTrustees[0].city : ''),
+        healthcare_agent_city: healthcareAgents[0]?.city || (successorTrustees[0] ? successorTrustees[0].city : ''),
         alternate_healthcare_agent: raw.alternate_healthcare_agent || (successorTrustees[1] ? successorTrustees[1].name : ''),
         life_sustaining_treatment: raw.life_sustaining_treatment || 'comfort_only',
         organ_donation: raw.organ_donation === 'yes',
         organ_donation_purpose: raw.organ_donation_purpose || 'any',
         primary_physician_name: raw.primary_physician_name || '',
-        // Financial POA
+
+        // Financial POA (expanded agents)
+        financial_agents: financialAgents,
         financial_agent_name: raw.financial_agent_name || (successorTrustees[0] ? successorTrustees[0].name : ''),
         financial_agent_city: raw.financial_agent_city || (successorTrustees[0] ? successorTrustees[0].city : ''),
         alternate_financial_agent: raw.alternate_financial_agent || (successorTrustees[1] ? successorTrustees[1].name : ''),
+        financial_poa_effective: raw.financial_poa_effective || 'now',
+        financial_poa_effective_now: (raw.financial_poa_effective || 'now') === 'now',
+        financial_poa_upon_disability: raw.financial_poa_effective === 'upon_disability',
+
         // Date fields
         execution_date_raw: dateStr,
         execution_day: dayNum,

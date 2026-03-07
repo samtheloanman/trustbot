@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustBot — Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 40px 32px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+        }
+
+        .login-card .logo {
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .login-card .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .login-card .field {
+            margin-bottom: 16px;
+        }
+
+        .login-card input[type="text"],
+        .login-card input[type="email"],
+        .login-card input[type="password"] {
+            width: 100%;
+        }
+
+        .login-card .btn-primary {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .login-card .toggle-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .login-card .toggle-link a {
+            color: var(--accent2);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-card .toggle-link a:hover {
+            text-decoration: underline;
+        }
+
+        .login-card .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .login-card .success-msg {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        #nameField {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="logo">
+                <span class="logo-icon">⚖️</span>
+                <span class="logo-text">TrustBot</span>
+            </div>
+            <h2 id="formTitle">Sign In</h2>
+            <p class="subtitle" id="formSubtitle">Access your estate planning portal</p>
+
+            <div class="error-msg" id="errorMsg"></div>
+            <div class="success-msg" id="successMsg"></div>
+
+            <form id="authForm" onsubmit="handleSubmit(event)">
+                <div class="field" id="nameField">
+                    <label>Full Name <span class="req">*</span></label>
+                    <input type="text" id="nameInput" placeholder="e.g. John Gamboa">
+                </div>
+                <div class="field">
+                    <label>Email Address <span class="req">*</span></label>
+                    <input type="email" id="emailInput" placeholder="you@example.com" required>
+                </div>
+                <div class="field">
+                    <label>Password <span class="req">*</span></label>
+                    <input type="password" id="passwordInput" placeholder="Min 6 characters" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary" id="submitBtn">Sign In</button>
+            </form>
+
+            <div class="toggle-link" id="toggleLink">
+                Don't have an account? <a onclick="toggleMode()">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRegister = false;
+
+        // Check if already logged in
+        (function checkAuth() {
+            const token = localStorage.getItem('trustbot_token');
+            if (!token) return;
+            fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.user) {
+                        redirectByRole(data.user.role);
+                    }
+                })
+                .catch(() => { });
+        })();
+
+        function toggleMode() {
+            isRegister = !isRegister;
+            document.getElementById('formTitle').textContent = isRegister ? 'Create Account' : 'Sign In';
+            document.getElementById('formSubtitle').textContent = isRegister
+                ? 'Register to start your trust application'
+                : 'Access your estate planning portal';
+            document.getElementById('nameField').style.display = isRegister ? 'flex' : 'none';
+            document.getElementById('submitBtn').textContent = isRegister ? 'Create Account' : 'Sign In';
+            document.getElementById('toggleLink').innerHTML = isRegister
+                ? 'Already have an account? <a onclick="toggleMode()">Sign in</a>'
+                : 'Don\'t have an account? <a onclick="toggleMode()">Create one</a>';
+            hideMessages();
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function redirectByRole(role) {
+            if (role === 'admin') {
+                window.location.href = '/admin';
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            hideMessages();
+
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const name = document.getElementById('nameInput').value.trim();
+
+            if (isRegister && !name) {
+                showError('Please enter your full name.');
+                return;
+            }
+
+            const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
+            const body = isRegister ? { name, email, password } : { email, password };
+
+            try {
+                const resp = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                const data = await resp.json();
+
+                if (!resp.ok || !data.success) {
+                    showError(data.error || 'Something went wrong');
+                    return;
+                }
+
+                localStorage.setItem('trustbot_token', data.token);
+                localStorage.setItem('trustbot_user', JSON.stringify(data.user));
+                showSuccess('Welcome, ' + data.user.name + '!');
+
+                setTimeout(() => redirectByRole(data.user.role), 500);
+            } catch (err) {
+                showError('Network error: ' + err.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

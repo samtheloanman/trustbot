@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustBot — Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-wrapper {
+            position: relative;
+            z-index: 5;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 24px 80px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .admin-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .admin-header h1 .gradient-text {
+            font-size: inherit;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-card .stat-value.pending {
+            color: var(--warning);
+        }
+
+        .stat-card .stat-value.completed {
+            color: var(--success);
+        }
+
+        .stat-card .stat-value.total {
+            color: var(--accent2);
+        }
+
+        .submissions-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .submissions-table th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .submissions-table td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .submissions-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .submissions-table tr:hover td {
+            background: var(--surface-hover);
+        }
+
+        .submissions-table .clickable {
+            cursor: pointer;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .status-badge.in_progress {
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+        }
+
+        .status-badge.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* ── Detail Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(10, 12, 18, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 720px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-top: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+        }
+
+        .detail-section h3 {
+            font-size: 14px;
+            color: var(--accent2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .detail-item.full {
+            grid-column: 1 / -1;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px 22px;
+            border-radius: 100px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 100px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: var(--font);
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .download-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .download-links a {
+            color: var(--accent2);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .download-links a:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+        }
+
+        .user-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-badge {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--surface);
+            padding: 6px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+        }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        @media (max-width: 600px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .submissions-table th:nth-child(3),
+            .submissions-table td:nth-child(3) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <header>
+        <div class="logo">
+            <span class="logo-icon">⚖️</span>
+            <span class="logo-text">TrustBot</span>
+        </div>
+        <div class="user-bar">
+            <span class="user-badge" id="userBadge">Admin</span>
+            <button class="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+    </header>
+
+    <div class="admin-wrapper">
+        <div class="admin-header">
+            <h1>📊 <span class="gradient-text">Dashboard</span></h1>
+        </div>
+
+        <div class="admin-stats" id="statsBar">
+            <div class="stat-card">
+                <div class="stat-label">Total Submissions</div>
+                <div class="stat-value total" id="statTotal">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending Review</div>
+                <div class="stat-value pending" id="statPending">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value completed" id="statCompleted">0</div>
+            </div>
+        </div>
+
+        <div id="tableWrap"></div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Submission Details</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div id="modalBody"></div>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>
