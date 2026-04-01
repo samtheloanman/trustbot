@@ -186,6 +186,12 @@ app.get('/download/:sessionId/:filename', (req, res) => {
   res.sendFile(filePath);
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🏛️  TrustBot running at http://localhost:${PORT}\n`);
-});
+// ── Start server (only if run directly) ────────────────────────────────────────────────────────────
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🏛️  TrustBot running at http://localhost:${PORT}\n`);
+  });
+}
+
+// Export the Express app for Vercel
+module.exports = app;

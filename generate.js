@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Handlebars = require('handlebars');
-const puppeteer = require('puppeteer');
+// puppeteer required inside the generator
 
 // Handlebars helpers
 Handlebars.registerHelper('or', (a, b) => a || b);
@@ -268,10 +268,22 @@ async function generateTrustPackage(rawData) {
     const data = prepareData(rawData);
     const safeName = data.grantor_name.replace(/[^a-z0-9]/gi, '_');
 
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+        const chromium = require('@sparticuz/chromium');
+        // Require puppeteer-core, or fallback to puppeteer if doing local dev with full package
+        const puppeteer = require('puppeteer-core');
+        
+        // Use sparticuz in production/Vercel, otherwise assume local Chrome (Mac path typically)
+        const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+        const executablePath = isVercel 
+            ? await chromium.executablePath()
+            : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        
+        const browser = await puppeteer.launch({
+            args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+            defaultViewport: chromium.defaultViewport,
+            executablePath: executablePath,
+            headless: chromium.headless,
+        });
 
     try {
         const docs = [

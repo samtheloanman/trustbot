@@ -4,3 +4,4 @@ output/
 *.pdf
 /tmp/
 .DS_Store
+.vercel
