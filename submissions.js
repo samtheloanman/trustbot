@@ -1,70 +1,71 @@
-const fs = require('fs');
-const path = require('path');
-
-const SUBS_FILE = path.join('/tmp', 'trustbot', 'submissions.json');
-
-function ensureDir() {
-    const dir = path.dirname(SUBS_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
-
-function loadAll() {
-    ensureDir();
-    if (!fs.existsSync(SUBS_FILE)) return [];
-    try { return JSON.parse(fs.readFileSync(SUBS_FILE, 'utf8')); }
-    catch { return []; }
-}
-
-function saveAll(subs) {
-    ensureDir();
-    fs.writeFileSync(SUBS_FILE, JSON.stringify(subs, null, 2));
-}
+const { supabase } = require('./db');
 
 // ── CRUD ─────────────────────────────────────────────────────
-function create(userId, userName, userEmail, formData) {
-    const subs = loadAll();
+async function create(userId, userName, userEmail, formData) {
     const sub = {
         id: 's-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         userId,
         userName,
         userEmail,
-        status: 'pending',        // pending → in_progress → completed
+        status: 'pending',
         data: formData,
-        generatedFiles: [],       // populated when admin generates docs
+        generatedFiles: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     };
-    subs.push(sub);
-    saveAll(subs);
+    
+    const { error } = await supabase.from('trustbot_submissions').insert(sub);
+    if (error) throw new Error(error.message);
     return sub;
 }
 
-function list() {
-    return loadAll().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+async function list() {
+    const { data, error } = await supabase
+        .from('trustbot_submissions')
+        .select('*')
+        .order('createdAt', { ascending: false });
+    if (error) return [];
+    return data;
 }
 
-function listByUser(userId) {
-    return loadAll().filter(s => s.userId === userId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+async function listByUser(userId) {
+    const { data, error } = await supabase
+        .from('trustbot_submissions')
+        .select('*')
+        .eq('userId', userId)
+        .order('createdAt', { ascending: false });
+    if (error) return [];
+    return data;
 }
 
-function getById(id) {
-    return loadAll().find(s => s.id === id) || null;
+async function getById(id) {
+    const { data, error } = await supabase
+        .from('trustbot_submissions')
+        .select('*')
+        .eq('id', id)
+        .single();
+    if (error) return null;
+    return data;
 }
 
-function update(id, updates) {
-    const subs = loadAll();
-    const idx = subs.findIndex(s => s.id === id);
-    if (idx === -1) return null;
-    subs[idx] = { ...subs[idx], ...updates, updatedAt: new Date().toISOString() };
-    saveAll(subs);
-    return subs[idx];
+async function update(id, updates) {
+    updates.updatedAt = new Date().toISOString();
+    const { data, error } = await supabase
+        .from('trustbot_submissions')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+    if (error) return null;
+    return data;
 }
 
-function remove(id) {
-    const subs = loadAll();
-    const filtered = subs.filter(s => s.id !== id);
-    if (filtered.length === subs.length) return false;
-    saveAll(filtered);
+async function remove(id) {
+    const { error } = await supabase
+        .from('trustbot_submissions')
+        .delete()
+        .eq('id', id);
+    if (error) return false;
     return true;
 }
 

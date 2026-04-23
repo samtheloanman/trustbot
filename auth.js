@@ -1,36 +1,23 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
+const { supabase } = require('./db');
 
-const USERS_FILE = path.join('/tmp', 'trustbot', 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'trustbot-dev-secret-change-me';
 const JWT_EXPIRES = '7d';
 
 // ── helpers ──────────────────────────────────────────────────
-function ensureDir() {
-    const dir = path.dirname(USERS_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
-
-function loadUsers() {
-    ensureDir();
-    if (!fs.existsSync(USERS_FILE)) return [];
-    try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); }
-    catch { return []; }
-}
-
-function saveUsers(users) {
-    ensureDir();
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
-
-function findByEmail(email) {
-    return loadUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
+async function findByEmail(email) {
+    const { data, error } = await supabase
+        .from('trustbot_users')
+        .select('*')
+        .ilike('email', email)
+        .single();
+    if (error) return null;
+    return data;
 }
 
 // ── admin seeding ────────────────────────────────────────────
-function seedAdmin() {
+async function seedAdmin() {
     const adminEmails = [
         process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim() : null,
         'sam@c-mtg.com'
@@ -39,21 +26,17 @@ function seedAdmin() {
 
     if (adminEmails.length === 0) return;
 
-    const users = loadUsers();
-    let changed = false;
-
-    adminEmails.forEach(email => {
+    for (const email of adminEmails) {
         const lowerEmail = email.toLowerCase();
-        const existing = users.find(u => u.email.toLowerCase() === lowerEmail);
+        const existing = await findByEmail(lowerEmail);
         
         if (existing) {
             if (existing.role !== 'admin') {
-                existing.role = 'admin';
-                changed = true;
+                await supabase.from('trustbot_users').update({ role: 'admin' }).eq('id', existing.id);
                 console.log('[TrustBot] User promoted to admin:', lowerEmail);
             }
         } else {
-            users.push({
+            await supabase.from('trustbot_users').insert({
                 id: 'admin-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
                 name: 'Admin',
                 email: lowerEmail,
@@ -61,13 +44,8 @@ function seedAdmin() {
                 role: 'admin',
                 createdAt: new Date().toISOString(),
             });
-            changed = true;
             console.log('[TrustBot] Admin account seeded:', lowerEmail);
         }
-    });
-
-    if (changed) {
-        saveUsers(users);
     }
 }
 
@@ -104,39 +82,54 @@ function requireClient(req, res, next) {
 }
 
 // ── route handlers ───────────────────────────────────────────
-function register(req, res) {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password required' });
-    if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    if (findByEmail(email)) return res.status(409).json({ error: 'Email already registered' });
+async function register(req, res) {
+    try {
+        const { name, email, password } = req.body;
+        if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password required' });
+        if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        
+        const existing = await findByEmail(email);
+        if (existing) return res.status(409).json({ error: 'Email already registered' });
 
-    const users = loadUsers();
-    const user = {
-        id: 'u-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        password: bcrypt.hashSync(password, 10),
-        role: 'client',
-        createdAt: new Date().toISOString(),
-    };
-    users.push(user);
-    saveUsers(users);
+        const user = {
+            id: 'u-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            password: bcrypt.hashSync(password, 10),
+            role: 'client',
+            createdAt: new Date().toISOString(),
+        };
+        
+        const { error } = await supabase.from('trustbot_users').insert(user);
+        if (error) {
+            console.error('[TrustBot] User insert error:', error);
+            return res.status(500).json({ error: 'Failed to register user' });
+        }
 
-    const token = signToken(user);
-    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+        const token = signToken(user);
+        res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 }
 
-function login(req, res) {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+async function login(req, res) {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
-    const user = findByEmail(email);
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        const user = await findByEmail(email);
+        if (!user || !bcrypt.compareSync(password, user.password)) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const token = signToken(user);
+        res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
     }
-
-    const token = signToken(user);
-    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 }
 
 function me(req, res) {
@@ -145,7 +138,7 @@ function me(req, res) {
 
 // ── mount routes ─────────────────────────────────────────────
 function mountAuthRoutes(app) {
-    seedAdmin();
+    seedAdmin().catch(console.error);
     app.post('/api/auth/register', register);
     app.post('/api/auth/login', login);
     app.get('/api/auth/me', verifyToken, me);

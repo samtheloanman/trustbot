@@ -1,11 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const { generateTrustPackage } = require('./generate');
 const { sendTrustPackage } = require('./email');
 const { mountAuthRoutes, requireAdmin, requireClient } = require('./auth');
 const submissions = require('./submissions');
+const { supabase } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,9 +31,9 @@ app.get('/', (req, res) => {
 });
 
 // ── Client: submit form data ────────────────────────────────
-app.post('/api/submissions', requireClient, (req, res) => {
+app.post('/api/submissions', requireClient, async (req, res) => {
   try {
-    const sub = submissions.create(req.user.id, req.user.name, req.user.email, req.body);
+    const sub = await submissions.create(req.user.id, req.user.name, req.user.email, req.body);
     console.log('[TrustBot] New submission from:', req.user.email, '→', sub.id);
     res.json({ success: true, submission: { id: sub.id, status: sub.status, createdAt: sub.createdAt } });
   } catch (err) {
@@ -43,39 +43,39 @@ app.post('/api/submissions', requireClient, (req, res) => {
 });
 
 // ── Client: view own submissions ─────────────────────────────
-app.get('/api/submissions', requireClient, (req, res) => {
-  const subs = submissions.listByUser(req.user.id);
+app.get('/api/submissions', requireClient, async (req, res) => {
+  const subs = await submissions.listByUser(req.user.id);
   res.json({ submissions: subs.map(s => ({ id: s.id, status: s.status, createdAt: s.createdAt, grantorName: s.data.grantor_name })) });
 });
 
 // ── Admin: list all submissions ──────────────────────────────
-app.get('/api/admin/submissions', requireAdmin, (req, res) => {
-  const subs = submissions.list();
+app.get('/api/admin/submissions', requireAdmin, async (req, res) => {
+  const subs = await submissions.list();
   res.json({ submissions: subs });
 });
 
 // ── Admin: view one submission ───────────────────────────────
-app.get('/api/admin/submissions/:id', requireAdmin, (req, res) => {
-  const sub = submissions.getById(req.params.id);
+app.get('/api/admin/submissions/:id', requireAdmin, async (req, res) => {
+  const sub = await submissions.getById(req.params.id);
   if (!sub) return res.status(404).json({ error: 'Submission not found' });
   res.json({ submission: sub });
 });
 
 // ── Admin: update submission data ────────────────────────────
-app.put('/api/admin/submissions/:id', requireAdmin, (req, res) => {
-  const sub = submissions.getById(req.params.id);
+app.put('/api/admin/submissions/:id', requireAdmin, async (req, res) => {
+  const sub = await submissions.getById(req.params.id);
   if (!sub) return res.status(404).json({ error: 'Submission not found' });
 
   const updates = {};
   if (req.body.data) updates.data = { ...sub.data, ...req.body.data };
   if (req.body.status) updates.status = req.body.status;
-  const updated = submissions.update(req.params.id, updates);
+  const updated = await submissions.update(req.params.id, updates);
   res.json({ success: true, submission: updated });
 });
 
 // ── Admin: delete submission ─────────────────────────────────
-app.delete('/api/admin/submissions/:id', requireAdmin, (req, res) => {
-  const removed = submissions.remove(req.params.id);
+app.delete('/api/admin/submissions/:id', requireAdmin, async (req, res) => {
+  const removed = await submissions.remove(req.params.id);
   if (!removed) return res.status(404).json({ error: 'Submission not found' });
   res.json({ success: true });
 });
@@ -83,25 +83,41 @@ app.delete('/api/admin/submissions/:id', requireAdmin, (req, res) => {
 // ── Admin: generate documents for a submission ───────────────
 app.post('/api/admin/submissions/:id/generate', requireAdmin, async (req, res) => {
   try {
-    const sub = submissions.getById(req.params.id);
+    const sub = await submissions.getById(req.params.id);
     if (!sub) return res.status(404).json({ error: 'Submission not found' });
 
     console.log('[TrustBot] Admin generating docs for submission:', sub.id);
     const { pdfBuffers, fileNames } = await generateTrustPackage(sub.data);
 
-    // Save PDFs with session ID
     const sessionId = sub.id;
-    const sessionDir = path.join('/tmp', 'trustbot', 'docs', sessionId);
-    fs.mkdirSync(sessionDir, { recursive: true });
+    const files = [];
 
-    const files = pdfBuffers.map((buf, i) => {
-      const name = fileNames[i];
-      fs.writeFileSync(path.join(sessionDir, name), buf);
-      return { name, url: `/api/admin/submissions/${sub.id}/download/${name}` };
-    });
+    for (let i = 0; i < pdfBuffers.length; i++) {
+        const buf = pdfBuffers[i];
+        const name = fileNames[i];
+        const storagePath = `${sessionId}/${name}`;
+        
+        const { error } = await supabase.storage
+            .from('trustbot-docs')
+            .upload(storagePath, buf, {
+                contentType: 'application/pdf',
+                upsert: true
+            });
+            
+        if (error) throw new Error('Upload failed: ' + error.message);
+        
+        const { data } = supabase.storage
+            .from('trustbot-docs')
+            .getPublicUrl(storagePath);
+            
+        // We use the local route so it looks the same to the frontend, 
+        // but it will redirect to the public URL. Or we can just return the public URL directly.
+        // Returning local route so we don't need to change frontend.
+        files.push({ name, url: `/api/admin/submissions/${sub.id}/download/${name}` });
+    }
 
     // Update submission status
-    submissions.update(sub.id, { status: 'completed', generatedFiles: files });
+    await submissions.update(sub.id, { status: 'completed', generatedFiles: files });
 
     // Email if requested
     if (req.body.sendEmail && sub.data.recipient_email) {
@@ -118,14 +134,8 @@ app.post('/api/admin/submissions/:id/generate', requireAdmin, async (req, res) =
 // ── Admin: download generated PDF ────────────────────────────
 app.get('/api/admin/submissions/:id/download/:filename', requireAdmin, (req, res) => {
   const { id, filename } = req.params;
-  if (!/^[a-zA-Z0-9_\-.]+$/.test(filename)) return res.status(400).send('Invalid filename');
-
-  const filePath = path.join('/tmp', 'trustbot', 'docs', id, filename);
-  if (!fs.existsSync(filePath)) return res.status(404).send('File not found. Regenerate documents.');
-
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  res.sendFile(filePath);
+  const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(`${id}/${filename}`);
+  res.redirect(data.publicUrl);
 });
 
 // ── Legacy: direct generation (still available if needed) ────
@@ -153,18 +163,28 @@ app.post('/generate', async (req, res) => {
     }
 
     const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    const sessionDir = path.join('/tmp', 'trustbot', sessionId);
-    fs.mkdirSync(sessionDir, { recursive: true });
+    const files = [];
 
-    const files = pdfBuffers.map((buf, i) => {
-      const name = fileNames[i];
-      fs.writeFileSync(path.join(sessionDir, name), buf);
-      return { name, url: `/download/${sessionId}/${name}` };
-    });
-
-    setTimeout(() => {
-      try { fs.rmSync(sessionDir, { recursive: true, force: true }); } catch { }
-    }, 60 * 60 * 1000);
+    for (let i = 0; i < pdfBuffers.length; i++) {
+        const buf = pdfBuffers[i];
+        const name = fileNames[i];
+        const storagePath = `legacy/${sessionId}/${name}`;
+        
+        const { error } = await supabase.storage
+            .from('trustbot-docs')
+            .upload(storagePath, buf, {
+                contentType: 'application/pdf',
+                upsert: true
+            });
+            
+        if (error) throw new Error('Upload failed: ' + error.message);
+        
+        const { data } = supabase.storage
+            .from('trustbot-docs')
+            .getPublicUrl(storagePath);
+            
+        files.push({ name, url: `/download/${sessionId}/${name}` });
+    }
 
     res.json({ success: true, files });
   } catch (err) {
@@ -176,14 +196,8 @@ app.post('/generate', async (req, res) => {
 // Legacy download route
 app.get('/download/:sessionId/:filename', (req, res) => {
   const { sessionId, filename } = req.params;
-  if (!/^[a-zA-Z0-9_-]+$/.test(sessionId) || !/^[a-zA-Z0-9_\-.]+$/.test(filename)) {
-    return res.status(400).send('Invalid request');
-  }
-  const filePath = path.join('/tmp', 'trustbot', sessionId, filename);
-  if (!fs.existsSync(filePath)) return res.status(404).send('File not found or expired.');
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  res.sendFile(filePath);
+  const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(`legacy/${sessionId}/${filename}`);
+  res.redirect(data.publicUrl);
 });
 
 // ── Start server (only if run directly) ────────────────────────────────────────────────────────────
