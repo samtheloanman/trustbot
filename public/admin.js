@@ -98,11 +98,14 @@ function renderTable() {
     wrap.innerHTML = html;
 }
 
+let currentSubmission = null;
+
 // ── View one submission ──────────────────────────────────────
 async function viewSubmission(id) {
     try {
         const data = await apiFetch('/api/admin/submissions/' + id);
-        showModal(data.submission);
+        currentSubmission = data.submission;
+        showModal(currentSubmission);
     } catch (err) {
         alert('Error loading: ' + err.message);
     }
@@ -110,6 +113,8 @@ async function viewSubmission(id) {
 
 function showModal(sub) {
     const modal = document.getElementById('detailModal');
+    document.getElementById('modalBody').style.display = 'block';
+    document.getElementById('modalEdit').style.display = 'none';
     const d = sub.data || {};
 
     document.getElementById('modalTitle').textContent = d.grantor_name || 'Submission Details';
@@ -197,10 +202,56 @@ function showModal(sub) {
             `<a href="${f.url}" target="_blank">📄 ${f.name.replace(/_/g, ' ').replace('.pdf', '')}</a>`
         ).join('')}</div>`;
     }
+    actions += `<button class="btn-warning" style="background:rgba(245, 158, 11, 0.15); color:#f59e0b; border:1px solid rgba(245, 158, 11, 0.3); padding:10px 22px; border-radius:100px; cursor:pointer;" onclick="toggleEdit('${sub.id}')" id="btnEditToggle">Edit Data</button>`;
+    actions += `<button class="btn-success" style="display:none;" onclick="saveEdit('${sub.id}')" id="btnSaveEdit">Save Changes</button>`;
     actions += `<button class="btn-danger" onclick="deleteSubmission('${sub.id}')">Delete</button>`;
     document.getElementById('modalActions').innerHTML = actions;
 
     modal.classList.add('active');
+}
+
+function toggleEdit(id) {
+    const body = document.getElementById('modalBody');
+    const edit = document.getElementById('modalEdit');
+    const btnToggle = document.getElementById('btnEditToggle');
+    const btnSave = document.getElementById('btnSaveEdit');
+    
+    if (edit.style.display === 'none') {
+        body.style.display = 'none';
+        edit.style.display = 'block';
+        document.getElementById('editDataJson').value = JSON.stringify(currentSubmission.data || {}, null, 2);
+        btnToggle.textContent = 'Cancel Edit';
+        btnSave.style.display = 'inline-block';
+    } else {
+        body.style.display = 'block';
+        edit.style.display = 'none';
+        btnToggle.textContent = 'Edit Data';
+        btnSave.style.display = 'none';
+    }
+}
+
+async function saveEdit(id) {
+    try {
+        const rawJson = document.getElementById('editDataJson').value;
+        const parsedData = JSON.parse(rawJson);
+        const btnSave = document.getElementById('btnSaveEdit');
+        btnSave.textContent = 'Saving...';
+        btnSave.disabled = true;
+        
+        await apiFetch('/api/admin/submissions/' + id, {
+            method: 'PUT',
+            body: JSON.stringify({ data: parsedData })
+        });
+        
+        alert('Data updated successfully!');
+        closeModal();
+        loadSubmissions();
+    } catch (err) {
+        alert('Invalid JSON or save failed: ' + err.message);
+        const btnSave = document.getElementById('btnSaveEdit');
+        btnSave.textContent = 'Save Changes';
+        btnSave.disabled = false;
+    }
 }
 
 function closeModal() {
