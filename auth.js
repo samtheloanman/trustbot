@@ -31,21 +31,44 @@ function findByEmail(email) {
 
 // ── admin seeding ────────────────────────────────────────────
 function seedAdmin() {
-    const email = process.env.ADMIN_EMAIL;
-    const password = process.env.ADMIN_PASSWORD;
-    if (!email || !password) return;
-    if (findByEmail(email)) return;
+    const adminEmails = [
+        process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim() : null,
+        'sam@c-mtg.com'
+    ].filter(Boolean);
+    const password = process.env.ADMIN_PASSWORD ? process.env.ADMIN_PASSWORD.trim() : 'Lolo@2323';
+
+    if (adminEmails.length === 0) return;
+
     const users = loadUsers();
-    users.push({
-        id: 'admin-' + Date.now().toString(36),
-        name: 'Admin',
-        email: email.toLowerCase(),
-        password: bcrypt.hashSync(password, 10),
-        role: 'admin',
-        createdAt: new Date().toISOString(),
+    let changed = false;
+
+    adminEmails.forEach(email => {
+        const lowerEmail = email.toLowerCase();
+        const existing = users.find(u => u.email.toLowerCase() === lowerEmail);
+        
+        if (existing) {
+            if (existing.role !== 'admin') {
+                existing.role = 'admin';
+                changed = true;
+                console.log('[TrustBot] User promoted to admin:', lowerEmail);
+            }
+        } else {
+            users.push({
+                id: 'admin-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+                name: 'Admin',
+                email: lowerEmail,
+                password: bcrypt.hashSync(password, 10),
+                role: 'admin',
+                createdAt: new Date().toISOString(),
+            });
+            changed = true;
+            console.log('[TrustBot] Admin account seeded:', lowerEmail);
+        }
     });
-    saveUsers(users);
-    console.log('[TrustBot] Admin account seeded:', email);
+
+    if (changed) {
+        saveUsers(users);
+    }
 }
 
 // ── JWT middleware ────────────────────────────────────────────
