@@ -80,7 +80,7 @@ function prepareData(raw) {
         if (name) {
             successorTrustees.push({
                 name,
-                address: raw[`successor_trustee_${i}_address`] || '',
+                address: raw[`successor_trustee_${i}_address`] ? raw[`successor_trustee_${i}_address`] + (raw[`successor_trustee_${i}_unit`] ? ', ' + raw[`successor_trustee_${i}_unit`] : '') : '',
                 city: raw[`successor_trustee_${i}_city`] || '',
                 state: raw[`successor_trustee_${i}_state`] || 'California',
                 zip: raw[`successor_trustee_${i}_zip`] || '',
@@ -96,7 +96,7 @@ function prepareData(raw) {
         if (name) {
             guardians.push({
                 name,
-                address: raw[`guardian_${i}_address`] || '',
+                address: raw[`guardian_${i}_address`] ? raw[`guardian_${i}_address`] + (raw[`guardian_${i}_unit`] ? ', ' + raw[`guardian_${i}_unit`] : '') : '',
                 city: raw[`guardian_${i}_city`] || '',
                 state: raw[`guardian_${i}_state`] || 'California',
                 zip: raw[`guardian_${i}_zip`] || '',
@@ -112,7 +112,7 @@ function prepareData(raw) {
         if (name) {
             custodians.push({
                 name,
-                address: raw[`custodian_${i}_address`] || '',
+                address: raw[`custodian_${i}_address`] ? raw[`custodian_${i}_address`] + (raw[`custodian_${i}_unit`] ? ', ' + raw[`custodian_${i}_unit`] : '') : '',
                 city: raw[`custodian_${i}_city`] || '',
                 state: raw[`custodian_${i}_state`] || 'California',
                 zip: raw[`custodian_${i}_zip`] || '',
@@ -130,7 +130,7 @@ function prepareData(raw) {
             healthcareAgents.push({
                 name: haNames[i],
                 gender: raw[`${prefix}_gender`] || '',
-                address: raw[`${prefix}_address`] || '',
+                address: raw[`${prefix}_address`] ? raw[`${prefix}_address`] + (raw[`${prefix}_unit`] ? ', ' + raw[`${prefix}_unit`] : '') : '',
                 city: raw[`${prefix}_city`] || (i === 0 ? raw.healthcare_agent_city || '' : ''),
                 state: raw[`${prefix}_state`] || 'California',
                 zip: raw[`${prefix}_zip`] || '',
@@ -148,7 +148,7 @@ function prepareData(raw) {
             financialAgents.push({
                 name: faNames[i],
                 gender: raw[`${prefix}_gender`] || '',
-                address: raw[`${prefix}_address`] || '',
+                address: raw[`${prefix}_address`] ? raw[`${prefix}_address`] + (raw[`${prefix}_unit`] ? ', ' + raw[`${prefix}_unit`] : '') : '',
                 city: raw[`${prefix}_city`] || (i === 0 ? raw.financial_agent_city || '' : ''),
                 state: raw[`${prefix}_state`] || 'California',
                 zip: raw[`${prefix}_zip`] || '',
@@ -163,20 +163,24 @@ function prepareData(raw) {
         // Grantor (expanded)
         grantor_name: raw.grantor_name || '',
         grantor_gender: raw.grantor_gender || '',
-        grantor_address: raw.grantor_address || '',
+        grantor_address: raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : '',
         grantor_city: raw.grantor_city || '',
         grantor_state: raw.grantor_state || 'California',
         grantor_zip: raw.grantor_zip || '',
         grantor_area_code: raw.grantor_area_code || '',
         grantor_phone: raw.grantor_phone || '',
         grantor_email: raw.grantor_email || '',
-        grantor_full_address: [raw.grantor_address, raw.grantor_city, raw.grantor_state, raw.grantor_zip].filter(Boolean).join(', '),
+        grantor_full_address: [raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : '', raw.grantor_city, raw.grantor_state, raw.grantor_zip].filter(Boolean).join(', '),
 
         // Trust
         trust_name: raw.trust_name || `The ${raw.grantor_name} Revocable Living Trust`,
 
         // Trustees
-        grantor_is_primary_trustee: true,
+        grantor_is_primary_trustee: raw.primary_trustee_type !== 'other',
+        primary_trustee_name: raw.primary_trustee_type === 'other' ? raw.primary_trustee_name : raw.grantor_name,
+        primary_trustee_address: raw.primary_trustee_type === 'other' ? (raw.primary_trustee_address ? raw.primary_trustee_address + (raw.primary_trustee_unit ? ', ' + raw.primary_trustee_unit : '') : '') : (raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : ''),
+        primary_trustee_city: raw.primary_trustee_type === 'other' ? raw.primary_trustee_city : raw.grantor_city,
+        primary_trustee_state: raw.primary_trustee_type === 'other' ? raw.primary_trustee_state : raw.grantor_state,
         successor_trustees: successorTrustees,
         successor_trustee_list: successorTrustees.map(t => `${t.name} of ${t.city}, ${t.state}`).join(' and '),
 
@@ -268,14 +272,14 @@ async function generateTrustPackage(rawData) {
     const data = prepareData(rawData);
     const safeName = data.grantor_name.replace(/[^a-z0-9]/gi, '_');
 
-        const chromium = require('@sparticuz/chromium');
+        const chromium = require('@sparticuz/chromium-min');
         // Require puppeteer-core, or fallback to puppeteer if doing local dev with full package
         const puppeteer = require('puppeteer-core');
         
         // Use sparticuz in production/Vercel, otherwise assume local Chrome (Mac path typically)
         const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
         const executablePath = isVercel 
-            ? await chromium.executablePath()
+            ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
             : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
         
         const browser = await puppeteer.launch({

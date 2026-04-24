@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set today as default execution date
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('execution_date').value = today;
+    initGoogleMaps();
 
     // Auto-populate trust name when grantor name changes
     document.getElementById('grantor_name').addEventListener('input', (e) => {
@@ -370,6 +371,161 @@ function collectBeneficiaries() {
     })).filter(b => b.name);
 }
 
+
+// ================= GOOGLE PLACES & ADDRESS BOOK =================
+let addressBookData = [];
+
+async function initGoogleMaps() {
+    try {
+        const resp = await fetch('/api/config');
+        const data = await resp.json();
+        if (data.googleMapsKey) {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${data.googleMapsKey}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            script.onload = initAutocomplete;
+            document.head.appendChild(script);
+        }
+    } catch (e) {
+        console.error('Failed to load Google Maps config', e);
+    }
+}
+
+function initAutocomplete() {
+    const inputs = document.querySelectorAll('.address-autocomplete');
+    inputs.forEach(input => {
+        const autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['address'],
+            componentRestrictions: { country: 'us' }
+        });
+        
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (!place.address_components) return;
+
+            // Find sibling fields by checking the parent container
+            const container = input.closest('.field-grid');
+            if (!container) return;
+            
+            const cityInput = container.querySelector('[id$="_city"]');
+            const stateInput = container.querySelector('[id$="_state"]');
+            const zipInput = container.querySelector('[id$="_zip"]');
+
+            let streetNum = '', route = '', city = '', state = '', zip = '';
+            
+            for (const component of place.address_components) {
+                const type = component.types[0];
+                if (type === 'street_number') streetNum = component.long_name;
+                if (type === 'route') route = component.long_name;
+                if (type === 'locality' || type === 'sublocality_level_1') city = component.long_name;
+                if (type === 'administrative_area_level_1') state = component.long_name;
+                if (type === 'postal_code') zip = component.long_name;
+            }
+
+            input.value = `${streetNum} ${route}`.trim();
+            if (cityInput) cityInput.value = city;
+            if (stateInput) stateInput.value = state;
+            if (zipInput) zipInput.value = zip;
+        });
+    });
+}
+
+function updateAddressBook() {
+    const data = {};
+        const extract = (prefix, nameIdOverride) => {
+        const nameId = nameIdOverride || (prefix + '_name');
+        const name = document.getElementById(nameId)?.value?.trim();
+        if (name && !data[name]) {
+            data[name] = {
+                name,
+                address: document.getElementById(prefix + '_address')?.value || '',
+                unit: document.getElementById(prefix + '_unit')?.value || '',
+                city: document.getElementById(prefix + '_city')?.value || '',
+                state: document.getElementById(prefix + '_state')?.value || '',
+                zip: document.getElementById(prefix + '_zip')?.value || '',
+                phone: document.getElementById(prefix + '_phone')?.value || '',
+                gender: document.getElementById(prefix + '_gender')?.value || ''
+            };
+        }
+    };
+
+
+        extract('grantor');
+    extract('spouse');
+    extract('primary_trustee');
+    for (let i = 1; i <= 3; i++) extract(`successor_trustee_${i}`);
+    for (let i = 1; i <= 2; i++) extract(`guardian_${i}`);
+    for (let i = 1; i <= 2; i++) extract(`custodian_${i}`);
+    extract('healthcare_agent_1', 'healthcare_agent_name');
+    extract('healthcare_agent_2', 'alternate_healthcare_agent');
+    extract('healthcare_agent_3');
+    extract('financial_agent_1', 'financial_agent_name');
+    extract('financial_agent_2', 'alternate_financial_agent');
+    extract('financial_agent_3');
+
+    addressBookData = Object.values(data);
+    
+    const selects = document.querySelectorAll('.person-selector');
+    selects.forEach(select => {
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- Select Existing Person --</option>';
+        addressBookData.forEach((person, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = person.name;
+            select.appendChild(opt);
+        });
+        select.value = currentVal;
+    });
+}
+
+// Bind address book updating to input changes
+document.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' && (e.target.id.endsWith('_name') || e.target.id.endsWith('_address') || e.target.id.endsWith('_city'))) {
+        updateAddressBook();
+    }
+});
+
+// Bind select change to populate fields
+document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('person-selector')) {
+        const idx = e.target.value;
+        if (idx === '') return;
+        const person = addressBookData[idx];
+        const prefix = e.target.dataset.target; // e.g. "guardian_1"
+        
+                const mapAndSet = (suffix, prop) => {
+            let elId = prefix + suffix;
+            
+            // Explicit overrides for inconsistent IDs
+            if (prefix === 'healthcare_agent_1' && suffix === '_name') elId = 'healthcare_agent_name';
+            if (prefix === 'healthcare_agent_2' && suffix === '_name') elId = 'alternate_healthcare_agent';
+            if (prefix === 'financial_agent_1' && suffix === '_name') elId = 'financial_agent_name';
+            if (prefix === 'financial_agent_2' && suffix === '_name') elId = 'alternate_financial_agent';
+
+            let el = document.getElementById(elId);
+            if (el) {
+                el.value = person[prop] || '';
+                // Trigger input event to update dependencies
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+        mapAndSet('_name', 'name');
+        mapAndSet('_address', 'address');
+        mapAndSet('_unit', 'unit');
+        mapAndSet('_city', 'city');
+        mapAndSet('_state', 'state');
+        mapAndSet('_zip', 'zip');
+        mapAndSet('_phone', 'phone');
+        
+        if (person.gender) {
+            const genderBtn = document.querySelector(`[data-field="${prefix}_gender"][data-value="${person.gender}"]`);
+            if (genderBtn) genderBtn.click();
+        }
+    }
+});
+
 // ================= SPECIFIC GIFTS =================
 function addGift() {
     giftCount++;
@@ -482,6 +638,11 @@ function collectProperties() {
 }
 
 // ================= TOGGLES =================
+
+function togglePrimaryTrusteeFields(show) {
+    document.getElementById('primaryTrusteeFields').style.display = show ? 'block' : 'none';
+}
+
 function toggleTrustee3() {
     trustee3Visible = !trustee3Visible;
     document.getElementById('trustee-row-3').style.display = trustee3Visible ? 'block' : 'none';

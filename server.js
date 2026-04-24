@@ -17,6 +17,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── Auth routes ──────────────────────────────────────────────
 mountAuthRoutes(app);
 
+// ── Config route ───────────────────────────────────────────────
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleMapsKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ''
+  });
+});
+
 // ── Pages ────────────────────────────────────────────────────
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
