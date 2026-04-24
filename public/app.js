@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!tn.dataset.manuallyEdited) {
                 tn.value = `The ${name} Revocable Living Trust`;
             }
-            document.getElementById('primaryTrusteeDisplay').textContent = name;
+            const ptd = document.getElementById('primaryTrusteeDisplay');
+            if (ptd) ptd.textContent = name;
         }
     });
     document.getElementById('trust_name').addEventListener('input', function () {
