@@ -273,19 +273,29 @@ async function generateTrustPackage(rawData) {
     const safeName = data.grantor_name.replace(/[^a-z0-9]/gi, '_');
 
         const chromium = require('@sparticuz/chromium-min');
-        // Require puppeteer-core, or fallback to puppeteer if doing local dev with full package
         const puppeteer = require('puppeteer-core');
-        
-        // Use sparticuz in production/Vercel, otherwise assume local Chrome (Mac path typically)
+
+        // Vercel Lambda (Amazon Linux 2) needs the al2 build with bundled system libs
         const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
-        const executablePath = isVercel 
-            ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
-            : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-        
+        const CHROMIUM_PACK_URL = 'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar';
+
+        const executablePath = isVercel
+            ? await chromium.executablePath(CHROMIUM_PACK_URL)
+            : (process.platform === 'darwin'
+                ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+                : '/usr/bin/google-chrome-stable');
+
         const browser = await puppeteer.launch({
-            args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+            args: [
+                ...chromium.args,
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--single-process',
+            ],
             defaultViewport: chromium.defaultViewport,
-            executablePath: executablePath,
+            executablePath,
             headless: chromium.headless,
         });
 

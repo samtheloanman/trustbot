@@ -394,8 +394,13 @@ async function initGoogleMaps() {
 }
 
 function initAutocomplete() {
+    window._mapsReady = true;
+
     const inputs = document.querySelectorAll('.address-autocomplete');
     inputs.forEach(input => {
+        // Skip property desc inputs — handled by initPropertyAutocomplete
+        if (input.classList.contains('prop-desc')) return;
+
         const autocomplete = new google.maps.places.Autocomplete(input, {
             types: ['address'],
             componentRestrictions: { country: 'us' }
@@ -430,6 +435,14 @@ function initAutocomplete() {
             if (zipInput) zipInput.value = zip;
         });
     });
+
+    // Init autocomplete for any property rows already on the page
+    for (let i = 1; i <= propertyCount; i++) {
+        const typeEl = document.getElementById(`prop-type-${i}`);
+        if (typeEl && typeEl.value === 'real_estate') {
+            initPropertyAutocomplete(i);
+        }
+    }
 }
 
 function updateAddressBook() {
@@ -600,17 +613,23 @@ function addProperty() {
     <div class="field-grid">
       <div class="field">
         <label>Type</label>
-        <select class="prop-type" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:14px;width:100%;font-family:var(--font);">
+        <select class="prop-type" id="prop-type-${id}" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:8px;font-size:14px;width:100%;font-family:var(--font);" onchange="onPropertyTypeChange(${id})">
           ${typeOptions}
         </select>
       </div>
-      <div class="field">
-        <label>APN / Account # <em>(optional)</em></label>
-        <input type="text" class="prop-apn" placeholder="e.g. 091-123-456">
+      <div class="field" id="prop-apn-wrap-${id}">
+        <label id="prop-apn-label-${id}">APN / Account # <em>(optional)</em></label>
+        <input type="text" class="prop-apn" id="prop-apn-${id}" placeholder="e.g. 091-123-456">
       </div>
       <div class="field full">
         <label>Description <span class="req">*</span></label>
-        <input type="text" class="prop-desc" placeholder="e.g. 652 Shady Ln, Santa Maria, CA 93455 or Chase Checking #xxxx">
+        <input type="text" class="prop-desc address-autocomplete" id="prop-desc-${id}" placeholder="e.g. 652 Shady Ln, Santa Maria, CA 93455 or Chase Checking #xxxx">
+        <div id="prop-manual-toggle-${id}" style="display:none; margin-top:6px;">
+          <label style="font-size:12px; color:var(--muted); cursor:pointer;">
+            <input type="checkbox" id="prop-manual-cb-${id}" onchange="toggleManualEntry(${id})">
+            Can't find address? Enter manually
+          </label>
+        </div>
       </div>
       <div class="field">
         <label>Estimated Value <em>(optional)</em></label>
@@ -622,7 +641,76 @@ function addProperty() {
     </div>
   `;
     document.getElementById('propertiesList').appendChild(div);
+
+    // Initialize autocomplete for this new row
+    if (window._mapsReady) {
+        initPropertyAutocomplete(id);
+    }
+    // Trigger type-change logic for default (Real Estate)
+    onPropertyTypeChange(id);
 }
+
+function onPropertyTypeChange(id) {
+    const typeEl = document.getElementById(`prop-type-${id}`);
+    const apnLabel = document.getElementById(`prop-apn-label-${id}`);
+    const manualToggle = document.getElementById(`prop-manual-toggle-${id}`);
+    const descInput = document.getElementById(`prop-desc-${id}`);
+    if (!typeEl) return;
+    const isRealEstate = typeEl.value === 'real_estate';
+
+    if (isRealEstate) {
+        // APN required for real estate
+        apnLabel.innerHTML = 'APN <span class="req">*</span>';
+        document.getElementById(`prop-apn-${id}`).required = true;
+        manualToggle.style.display = 'block';
+        descInput.placeholder = 'Search property address…';
+        descInput.classList.add('address-autocomplete');
+        // Re-init autocomplete in case it lost focus
+        if (window._mapsReady) initPropertyAutocomplete(id);
+    } else {
+        apnLabel.innerHTML = 'APN / Account # <em>(optional)</em>';
+        document.getElementById(`prop-apn-${id}`).required = false;
+        manualToggle.style.display = 'none';
+        descInput.placeholder = 'e.g. Chase Checking #xxxx1234';
+        descInput.classList.remove('address-autocomplete');
+    }
+}
+
+function toggleManualEntry(id) {
+    const cb = document.getElementById(`prop-manual-cb-${id}`);
+    const descInput = document.getElementById(`prop-desc-${id}`);
+    const apnInput = document.getElementById(`prop-apn-${id}`);
+    const apnLabel = document.getElementById(`prop-apn-label-${id}`);
+    if (cb.checked) {
+        // Manual mode: free text, APN still required
+        descInput.placeholder = 'Enter full property address (e.g. 652 Shady Ln, Santa Maria, CA 93455)';
+        descInput.classList.remove('address-autocomplete');
+        apnLabel.innerHTML = 'APN <span class="req">*</span> <em>(required for manual entry)</em>';
+    } else {
+        descInput.placeholder = 'Search property address…';
+        descInput.classList.add('address-autocomplete');
+        apnLabel.innerHTML = 'APN <span class="req">*</span>';
+        if (window._mapsReady) initPropertyAutocomplete(id);
+    }
+}
+
+function initPropertyAutocomplete(id) {
+    const input = document.getElementById(`prop-desc-${id}`);
+    if (!input || !window.google?.maps?.places) return;
+    if (input.dataset.autocompleteInit) return; // already done
+    input.dataset.autocompleteInit = '1';
+    const ac = new google.maps.places.Autocomplete(input, {
+        types: ['address'],
+        componentRestrictions: { country: 'us' },
+    });
+    ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (place?.formatted_address) {
+            input.value = place.formatted_address;
+        }
+    });
+}
+
 
 function removeProperty(id) {
     document.getElementById(`prop-row-${id}`).remove();
