@@ -275,7 +275,6 @@ async function generateTrustPackage(rawData) {
         const chromium = require('@sparticuz/chromium-min');
         const puppeteer = require('puppeteer-core');
 
-        // Vercel Lambda (Amazon Linux 2) needs the al2 build with bundled system libs
         const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
         const CHROMIUM_PACK_URL = 'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar';
 
@@ -285,6 +284,12 @@ async function generateTrustPackage(rawData) {
                 ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
                 : '/usr/bin/google-chrome-stable');
 
+        // HOME must be /tmp — only writable dir in Lambda
+        // --no-zygote is critical: the zygote subprocess loads libnss3.so which
+        //   is absent from Vercel's Lambda runtime. Disabling it eliminates the
+        //   "cannot open shared object file: No such file or directory" crash.
+        if (isVercel) process.env.HOME = '/tmp';
+
         const browser = await puppeteer.launch({
             args: [
                 ...chromium.args,
@@ -292,6 +297,7 @@ async function generateTrustPackage(rawData) {
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-gpu',
+                '--no-zygote',        // ← kills the libnss3.so crash
                 '--single-process',
             ],
             defaultViewport: chromium.defaultViewport,
