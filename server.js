@@ -37,6 +37,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Favicon (suppress 404 noise) ─────────────────────────────
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // ── Client: submit form data ────────────────────────────────
 app.post('/api/submissions', requireClient, async (req, res) => {
   try {
@@ -145,23 +148,32 @@ app.get('/api/admin/submissions/:id/download/:filename', requireAdmin, (req, res
   res.redirect(data.publicUrl);
 });
 
-// ── Legacy: direct generation (still available if needed) ────
-app.post('/generate', async (req, res) => {
+// ── Legacy: direct generation — requires auth ────────────────
+// NOTE: Unauthenticated callers will get 401. Clients use /api/submissions.
+// Admins trigger generation via /api/admin/submissions/:id/generate.
+// This route remains for backwards-compat tooling only.
+app.post('/generate', requireClient, async (req, res) => {
+  const tag = `[/generate ${req.user?.email ?? 'unknown'}]`;
   try {
     const formData = req.body;
-    console.log('[TrustBot] Generating trust package for:', formData.grantor_name);
+    console.log(tag, 'Starting PDF generation for:', formData.grantor_name);
 
     const required = ['grantor_name', 'grantor_city', 'trust_name', 'successor_trustee_1_name'];
     for (const field of required) {
       if (!formData[field]) {
+        console.warn(tag, 'Missing required field:', field);
         return res.status(400).json({ error: `Missing required field: ${field}` });
       }
     }
 
+    console.log(tag, 'Launching Chromium for PDF rendering...');
+    const t0 = Date.now();
     const { pdfBuffers, fileNames } = await generateTrustPackage(formData);
+    console.log(tag, `PDFs generated in ${Date.now() - t0}ms — ${fileNames.length} docs`);
 
     if (formData.delivery_method === 'email' && formData.recipient_email) {
       await sendTrustPackage(formData.recipient_email, formData.grantor_name, pdfBuffers, fileNames);
+      console.log(tag, 'Emailed to:', formData.recipient_email);
       return res.json({
         success: true,
         message: `Trust package emailed to ${formData.recipient_email}`,
@@ -176,26 +188,24 @@ app.post('/generate', async (req, res) => {
         const buf = pdfBuffers[i];
         const name = fileNames[i];
         const storagePath = `legacy/${sessionId}/${name}`;
-        
+
         const { error } = await supabase.storage
             .from('trustbot-docs')
-            .upload(storagePath, buf, {
-                contentType: 'application/pdf',
-                upsert: true
-            });
-            
-        if (error) throw new Error('Upload failed: ' + error.message);
-        
-        const { data } = supabase.storage
-            .from('trustbot-docs')
-            .getPublicUrl(storagePath);
-            
+            .upload(storagePath, buf, { contentType: 'application/pdf', upsert: true });
+
+        if (error) {
+          console.error(tag, 'Storage upload failed for', name, ':', error.message);
+          throw new Error('Upload failed: ' + error.message);
+        }
+
+        const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(storagePath);
         files.push({ name, url: `/download/${sessionId}/${name}` });
     }
 
+    console.log(tag, 'Done. Files:', files.map(f => f.name).join(', '));
     res.json({ success: true, files });
   } catch (err) {
-    console.error('[TrustBot] Error generating package:', err);
+    console.error(tag, 'FATAL ERROR:', err.message, '\nStack:', err.stack);
     res.status(500).json({ error: 'Failed to generate trust package: ' + err.message });
   }
 });
