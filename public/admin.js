@@ -266,16 +266,17 @@ document.getElementById('detailModal').addEventListener('click', (e) => {
 // ── Generate documents ───────────────────────────────────────
 async function generateDocs(id) {
     if (!confirm('Generate all trust documents for this submission?')) return;
+    const btn = document.querySelector('#modalActions .btn-success');
     try {
-        const btn = document.querySelector('.btn-success');
-        if (btn) { btn.textContent = '⏳ Generating...'; btn.disabled = true; }
+        if (btn) { btn.textContent = '⏳ Generating… (~30s)'; btn.disabled = true; }
 
-        const data = await apiFetch('/api/admin/submissions/' + id + '/generate', { method: 'POST', body: '{}' });
+        await apiFetch('/api/admin/submissions/' + id + '/generate', { method: 'POST', body: '{}' });
 
-        alert('Documents generated successfully!');
-        closeModal();
-        loadSubmissions();
+        // Reload the submission so download links appear immediately
+        await loadSubmissions();
+        await viewSubmission(id); // reopen modal with fresh data
     } catch (err) {
+        if (btn) { btn.textContent = '🏛 Generate Documents'; btn.disabled = false; }
         alert('Generation failed: ' + err.message);
     }
 }
