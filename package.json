@@ -23,5 +23,9 @@
     "node-fetch": "^2.7.0",
     "nodemailer": "^8.0.1",
     "puppeteer-core": "^24.40.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "playwright": "^1.59.1"
   }
 }
