@@ -148,11 +148,11 @@ app.get('/api/admin/submissions/:id/download/:filename', requireAdmin, (req, res
   res.redirect(data.publicUrl);
 });
 
-// ── Legacy: direct generation — requires auth ────────────────
-// NOTE: Unauthenticated callers will get 401. Clients use /api/submissions.
+// ── Legacy: direct generation — public access for testing/demos ────────────────
+// Clients use /api/submissions for the main flow.
 // Admins trigger generation via /api/admin/submissions/:id/generate.
-// This route remains for backwards-compat tooling only.
-app.post('/generate', requireClient, async (req, res) => {
+// This route is public to allow demo document generation without logging in.
+app.post('/generate', async (req, res) => {
   const tag = `[/generate ${req.user?.email ?? 'unknown'}]`;
   try {
     const formData = req.body;

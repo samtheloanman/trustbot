@@ -382,10 +382,10 @@ async function initGoogleMaps() {
         const data = await resp.json();
         if (data.googleMapsKey) {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${data.googleMapsKey}&libraries=places`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${data.googleMapsKey}&libraries=places&loading=async&callback=initAutocomplete`;
             script.async = true;
             script.defer = true;
-            script.onload = initAutocomplete;
+            // The callback parameter tells Google Maps to call window.initAutocomplete
             document.head.appendChild(script);
         }
     } catch (e) {
@@ -393,7 +393,7 @@ async function initGoogleMaps() {
     }
 }
 
-function initAutocomplete() {
+window.initAutocomplete = function initAutocomplete() {
     window._mapsReady = true;
 
     const inputs = document.querySelectorAll('.address-autocomplete');
@@ -655,60 +655,100 @@ function onPropertyTypeChange(id) {
     const apnLabel = document.getElementById(`prop-apn-label-${id}`);
     const manualToggle = document.getElementById(`prop-manual-toggle-${id}`);
     const descInput = document.getElementById(`prop-desc-${id}`);
+    const acEl = document.getElementById(`prop-desc-ac-${id}`);
     if (!typeEl) return;
     const isRealEstate = typeEl.value === 'real_estate';
 
     if (isRealEstate) {
-        // APN required for real estate
-        apnLabel.innerHTML = 'APN <span class="req">*</span>';
-        document.getElementById(`prop-apn-${id}`).required = true;
         manualToggle.style.display = 'block';
-        descInput.placeholder = 'Search property address…';
-        descInput.classList.add('address-autocomplete');
-        // Re-init autocomplete in case it lost focus
-        if (window._mapsReady) initPropertyAutocomplete(id);
+        const manualCb = document.getElementById(`prop-manual-cb-${id}`);
+        if (manualCb && manualCb.checked) {
+            apnLabel.innerHTML = 'APN <span class="req">*</span> <em>(required for manual entry)</em>';
+            document.getElementById(`prop-apn-${id}`).required = true;
+            descInput.style.display = 'block';
+            if (acEl) acEl.style.display = 'none';
+        } else {
+            apnLabel.innerHTML = 'APN <em>(optional)</em>';
+            document.getElementById(`prop-apn-${id}`).required = false;
+            descInput.style.display = 'none';
+            if (acEl) acEl.style.display = 'block';
+            else if (window._mapsReady) initPropertyAutocomplete(id);
+        }
     } else {
         apnLabel.innerHTML = 'APN / Account # <em>(optional)</em>';
         document.getElementById(`prop-apn-${id}`).required = false;
         manualToggle.style.display = 'none';
         descInput.placeholder = 'e.g. Chase Checking #xxxx1234';
-        descInput.classList.remove('address-autocomplete');
+        descInput.style.display = 'block';
+        if (acEl) acEl.style.display = 'none';
     }
 }
 
 function toggleManualEntry(id) {
     const cb = document.getElementById(`prop-manual-cb-${id}`);
     const descInput = document.getElementById(`prop-desc-${id}`);
+    const acEl = document.getElementById(`prop-desc-ac-${id}`);
     const apnInput = document.getElementById(`prop-apn-${id}`);
     const apnLabel = document.getElementById(`prop-apn-label-${id}`);
+    
     if (cb.checked) {
-        // Manual mode: free text, APN still required
+        // Manual mode: free text, APN required
         descInput.placeholder = 'Enter full property address (e.g. 652 Shady Ln, Santa Maria, CA 93455)';
-        descInput.classList.remove('address-autocomplete');
+        if (acEl) acEl.style.display = 'none';
+        descInput.style.display = 'block';
         apnLabel.innerHTML = 'APN <span class="req">*</span> <em>(required for manual entry)</em>';
+        apnInput.required = true;
     } else {
-        descInput.placeholder = 'Search property address…';
-        descInput.classList.add('address-autocomplete');
-        apnLabel.innerHTML = 'APN <span class="req">*</span>';
-        if (window._mapsReady) initPropertyAutocomplete(id);
+        // Auto mode
+        descInput.style.display = 'none';
+        if (acEl) acEl.style.display = 'block';
+        else if (window._mapsReady) initPropertyAutocomplete(id);
+        
+        apnLabel.innerHTML = 'APN <em>(optional)</em>';
+        apnInput.required = false;
     }
 }
 
-function initPropertyAutocomplete(id) {
+async function initPropertyAutocomplete(id) {
     const input = document.getElementById(`prop-desc-${id}`);
-    if (!input || !window.google?.maps?.places) return;
+    if (!input || !window.google?.maps) return;
     if (input.dataset.autocompleteInit) return; // already done
     input.dataset.autocompleteInit = '1';
-    const ac = new google.maps.places.Autocomplete(input, {
-        types: ['address'],
-        componentRestrictions: { country: 'us' },
-    });
-    ac.addListener('place_changed', () => {
-        const place = ac.getPlace();
-        if (place?.formatted_address) {
-            input.value = place.formatted_address;
+    
+    try {
+        const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
+        const ac = new PlaceAutocompleteElement({
+            componentRestrictions: { country: 'us' },
+        });
+        ac.id = `prop-desc-ac-${id}`;
+        
+        // We inject it before the manual toggle
+        const manualToggle = document.getElementById(`prop-manual-toggle-${id}`);
+        input.parentNode.insertBefore(ac, manualToggle);
+        
+        // Sync values to the hidden input
+        ac.addEventListener('gmp-placeselect', async ({ placePrediction }) => {
+            const place = placePrediction.toPlace();
+            await place.fetchFields({ fields: ['formattedAddress'] });
+            input.value = place.formattedAddress || ac.inputValue;
+        });
+        ac.addEventListener('input', (e) => {
+            input.value = e.target.inputValue || '';
+        });
+        
+        // Force the display state based on the current toggle state
+        const cb = document.getElementById(`prop-manual-cb-${id}`);
+        if (cb && cb.checked) {
+            ac.style.display = 'none';
+            input.style.display = 'block';
+        } else {
+            ac.style.display = 'block';
+            input.style.display = 'none';
         }
-    });
+    } catch (e) {
+        console.error('Places API error:', e);
+        input.style.display = 'block'; // fallback to manual if API fails
+    }
 }
 
 
@@ -877,8 +917,8 @@ function collectFormData() {
 async function submitForm() {
     const data = collectFormData();
 
-    // If logged in as client, submit to server for admin review
-    if (isLoggedIn && currentUser && currentUser.role === 'client') {
+    // If logged in, submit to server for admin review
+    if (isLoggedIn && currentUser) {
         document.getElementById('loadingOverlay').style.display = 'flex';
         document.getElementById('loadingText').textContent = 'Submitting your application…';
 
