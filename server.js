@@ -130,7 +130,7 @@ app.post('/api/admin/submissions/:id/generate', requireAdmin, async (req, res) =
     await submissions.update(sub.id, { status: 'completed', generatedFiles: files });
 
     // Email if requested
-    if (req.body.sendEmail && sub.data.recipient_email) {
+    if (req.body?.sendEmail && sub.data.recipient_email) {
       await sendTrustPackage(sub.data.recipient_email, sub.data.grantor_name, pdfBuffers, fileNames);
     }
 
