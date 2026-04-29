@@ -198,8 +198,9 @@ function showModal(sub) {
         actions += `<button class="btn-success" onclick="generateDocs('${sub.id}')">🏛 Generate Documents</button>`;
     }
     if (sub.generatedFiles?.length) {
+        const token = localStorage.getItem('trustbot_token') || '';
         actions += `<div class="download-links">${sub.generatedFiles.map(f =>
-            `<a href="${f.url}" target="_blank">📄 ${f.name.replace(/_/g, ' ').replace('.pdf', '')}</a>`
+            `<a href="${f.url}${f.url.includes('?') ? '&' : '?'}token=${token}" target="_blank">📄 ${f.name.replace(/_/g, ' ').replace('.pdf', '')}</a>`
         ).join('')}</div>`;
     }
     actions += `<button class="btn-warning" style="background:rgba(245, 158, 11, 0.15); color:#f59e0b; border:1px solid rgba(245, 158, 11, 0.3); padding:10px 22px; border-radius:100px; cursor:pointer;" onclick="toggleEdit('${sub.id}')" id="btnEditToggle">Edit Data</button>`;

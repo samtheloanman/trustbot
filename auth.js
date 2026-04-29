@@ -55,16 +55,26 @@ function signToken(user) {
 }
 
 function verifyToken(req, res, next) {
+    let token = null;
     const header = req.headers.authorization;
-    if (!header || !header.startsWith('Bearer ')) {
+    
+    if (header && header.startsWith('Bearer ')) {
+        token = header.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (!token) {
+        console.error('[Auth] verifyToken missing/invalid header or query token');
         return res.status(401).json({ error: 'Not authenticated' });
     }
     try {
-        const decoded = jwt.verify(header.split(' ')[1], JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
-    } catch {
-        return res.status(401).json({ error: 'Invalid or expired token' });
+    } catch (err) {
+        console.error('[Auth] verifyToken error:', err.message);
+        return res.status(401).json({ error: 'Invalid or expired token', details: err.message });
     }
 }
 
