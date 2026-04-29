@@ -27,7 +27,7 @@
 | 2.4 | Real estate field: Places + APN required | ✅ Done | 2.1 |
 | 2.5 | Fix libnss3.so crash (--no-zygote) | ✅ Done | 1.7 |
 | 2.6 | Fix submissions column mismatch (snake_case) | ✅ Done | 1.5 |
-| **2.7** | **Fix Vercel PDF timeout (maxDuration: 60)** | 🔴 NEXT | 2.5 |
+| 2.7 | Fix Vercel PDF timeout (maxDuration: 60) | ✅ Done | 2.5 |
 | 2.8 | Form validation — required field highlights | 📋 Planned | 1.3 |
 | 2.9 | Status transitions + polling (pending→generating→done) | 📋 Planned | 2.6 |
 | 2.10 | Error UX — user-friendly failure messages | 📋 Planned | 2.7 |
@@ -66,9 +66,9 @@
 
 ---
 
-## Next Immediate Action: Phase 2.7
+## Next Immediate Action: Phase 2.8
 
-**Fix Vercel PDF timeout** — add maxDuration: 60 to vercel.json.
-This is a production blocker — without it, all PDF generation will timeout at 10s.
+**Form validation — required field highlights** — Add visual highlights for required fields before form submission.
+This will improve UX by ensuring users don't submit incomplete data.
 
-Then Phase 2.8 → 2.9 to complete UX milestone, then Milestone 3 before any public launch.
+Then Phase 2.9 (Status transitions + polling) and 2.10 (Error UX) to complete the UX milestone, followed by Milestone 3 before any public launch.
