@@ -20,7 +20,10 @@ async function findByEmail(email) {
 async function seedAdmin() {
     const adminEmails = [
         process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim() : null,
-        'sam@c-mtg.com'
+        'sam@c-mtg.com',
+        'custommtg23@gmail.com',
+        'processing@c-mtg.com',
+        'eve@c-mtg.com'
     ].filter(Boolean);
     const password = process.env.ADMIN_PASSWORD ? process.env.ADMIN_PASSWORD.trim() : 'Lolo@2323';
 

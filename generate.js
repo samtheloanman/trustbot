@@ -288,7 +288,12 @@ async function generateTrustPackage(rawData) {
         // --no-zygote is critical: the zygote subprocess loads libnss3.so which
         //   is absent from Vercel's Lambda runtime. Disabling it eliminates the
         //   "cannot open shared object file: No such file or directory" crash.
-        if (isVercel) process.env.HOME = '/tmp';
+        if (isVercel) {
+            process.env.HOME = '/tmp';
+            if (!process.env.AWS_LAMBDA_JS_RUNTIME) {
+                process.env.AWS_LAMBDA_JS_RUNTIME = 'nodejs20.x';
+            }
+        }
 
         const browser = await puppeteer.launch({
             args: [
