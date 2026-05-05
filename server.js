@@ -171,9 +171,18 @@ app.post('/generate', async (req, res) => {
     const { pdfBuffers, fileNames } = await generateTrustPackage(formData);
     console.log(tag, `PDFs generated in ${Date.now() - t0}ms — ${fileNames.length} docs`);
 
+    // Save to DB so it appears on the admin dashboard (even for anonymous/legacy submissions)
+    const subId = 's-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
     if (formData.delivery_method === 'email' && formData.recipient_email) {
       await sendTrustPackage(formData.recipient_email, formData.grantor_name, pdfBuffers, fileNames);
       console.log(tag, 'Emailed to:', formData.recipient_email);
+
+      // Record in DB with completed status
+      await submissions.create('anonymous', formData.grantor_name || 'Anonymous', formData.grantor_email || formData.recipient_email || '', formData)
+        .then(sub => submissions.update(sub.id, { status: 'completed' }))
+        .catch(e => console.error(tag, 'DB save (non-fatal):', e.message));
+
       return res.json({
         success: true,
         message: `Trust package emailed to ${formData.recipient_email}`,
@@ -201,6 +210,11 @@ app.post('/generate', async (req, res) => {
         const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(storagePath);
         files.push({ name, url: `/download/${sessionId}/${name}` });
     }
+
+    // Record in DB so admins see it on the dashboard
+    await submissions.create('anonymous', formData.grantor_name || 'Anonymous', formData.grantor_email || '', formData)
+      .then(sub => submissions.update(sub.id, { status: 'completed', generatedFiles: files }))
+      .catch(e => console.error(tag, 'DB save (non-fatal):', e.message));
 
     console.log(tag, 'Done. Files:', files.map(f => f.name).join(', '));
     res.json({ success: true, files });
