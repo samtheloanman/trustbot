@@ -135,6 +135,7 @@ function prepareData(raw) {
                 state: raw[`${prefix}_state`] || 'California',
                 zip: raw[`${prefix}_zip`] || '',
                 phone: raw[`${prefix}_phone`] || '',
+                relationship: raw[`${prefix}_relationship`] || '',
             });
         }
     }
@@ -153,6 +154,7 @@ function prepareData(raw) {
                 state: raw[`${prefix}_state`] || 'California',
                 zip: raw[`${prefix}_zip`] || '',
                 phone: raw[`${prefix}_phone`] || '',
+                relationship: raw[`${prefix}_relationship`] || '',
             });
         }
     }
@@ -170,6 +172,7 @@ function prepareData(raw) {
         grantor_area_code: raw.grantor_area_code || '',
         grantor_phone: raw.grantor_phone || '',
         grantor_email: raw.grantor_email || '',
+        grantor_dob: raw.grantor_dob || '',
         grantor_full_address: [raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : '', raw.grantor_city, raw.grantor_state, raw.grantor_zip].filter(Boolean).join(', '),
 
         // Trust

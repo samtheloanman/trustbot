@@ -80,15 +80,15 @@
 
     <div class="box">
         <strong>Patient / Principal:</strong> {{grantor_name}}<br>
-        <strong>Date of Birth:</strong> ____________________________<br>
-        <strong>Address:</strong> {{grantor_city}}, {{grantor_state}}
+        <strong>Date of Birth:</strong> {{#if grantor_dob}}{{grantor_dob}}{{else}}____________________________{{/if}}<br>
+        <strong>Address:</strong> {{grantor_full_address}}
     </div>
 
     <h2>1. Authorized Representatives</h2>
     <div class="box">
         <strong>Primary Representative / Healthcare Agent:</strong> {{healthcare_agent_name}} — Phone:
-        ____________________<br><br>
-        <strong>Alternate / Successor Trustee:</strong> {{alternate_healthcare_agent}} — Phone: ____________________
+        {{#if healthcare_agents.[0].phone}}{{healthcare_agents.[0].phone}}{{else}}____________________{{/if}}<br><br>
+        <strong>Alternate / Successor Trustee:</strong> {{alternate_healthcare_agent}} — Phone: {{#if healthcare_agents.[1].phone}}{{healthcare_agents.[1].phone}}{{else}}____________________{{/if}}
     </div>
 
     <h2>2. Information to Be Released</h2>

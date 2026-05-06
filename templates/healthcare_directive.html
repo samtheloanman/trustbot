@@ -128,15 +128,16 @@
         individual as my agent to make health care decisions for me:</p>
     <div class="box">
         <strong>Agent:</strong> {{healthcare_agent_name}}<br>
-        <strong>City:</strong> {{healthcare_agent_city}}<br>
-        <strong>Phone:</strong> ____________________________
+        <strong>City:</strong> {{#if healthcare_agents.[0].city}}{{healthcare_agents.[0].city}}, {{healthcare_agents.[0].state}}{{else}}{{healthcare_agent_city}}{{/if}}<br>
+        <strong>Phone:</strong> {{#if healthcare_agents.[0].phone}}{{healthcare_agents.[0].phone}}{{else}}____________________________{{/if}}
     </div>
 
     <p>If my agent is not willing, able, or reasonably available to make a health care decision for me, I designate as
         my first alternate agent:</p>
     <div class="box">
         <strong>Alternate Agent:</strong> {{alternate_healthcare_agent}}<br>
-        <strong>Phone:</strong> ____________________________
+        <strong>City:</strong> {{#if healthcare_agents.[1].city}}{{healthcare_agents.[1].city}}, {{healthcare_agents.[1].state}}{{else}}____________________________{{/if}}<br>
+        <strong>Phone:</strong> {{#if healthcare_agents.[1].phone}}{{healthcare_agents.[1].phone}}{{else}}____________________________{{/if}}
     </div>
 
     <p><strong>1.2 Agent's Authority.</strong> My agent is authorized to make all health care decisions for me,

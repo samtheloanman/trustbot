@@ -104,15 +104,16 @@
     <h2>1. Designation of Agent</h2>
     <p>I, <strong>{{grantor_name}}</strong>, hereby appoint:</p>
     <div class="box">
-        <strong>Agent (Attorney-in-Fact):</strong> {{financial_agent_name}} of {{financial_agent_city}}<br>
-        <strong>Phone:</strong> ____________________________<br>
-        <strong>Relationship:</strong> ____________________________
+        <strong>Agent (Attorney-in-Fact):</strong> {{financial_agent_name}} of {{#if financial_agents.[0].city}}{{financial_agents.[0].city}}, {{financial_agents.[0].state}}{{else}}{{financial_agent_city}}{{/if}}<br>
+        <strong>Phone:</strong> {{#if financial_agents.[0].phone}}{{financial_agents.[0].phone}}{{else}}____________________________{{/if}}<br>
+        <strong>Relationship:</strong> {{#if financial_agents.[0].relationship}}{{financial_agents.[0].relationship}}{{else}}____________________________{{/if}}
     </div>
     <p>as my true and lawful attorney-in-fact (Agent). If my Agent is unable or unwilling to act, I appoint as my first
         Alternate Agent:</p>
     <div class="box">
         <strong>Alternate Agent:</strong> {{alternate_financial_agent}}<br>
-        <strong>Phone:</strong> ____________________________
+        <strong>City:</strong> {{#if financial_agents.[1].city}}{{financial_agents.[1].city}}, {{financial_agents.[1].state}}{{else}}____________________________{{/if}}<br>
+        <strong>Phone:</strong> {{#if financial_agents.[1].phone}}{{financial_agents.[1].phone}}{{else}}____________________________{{/if}}
     </div>
 
     <h2>2. Durability Clause</h2>

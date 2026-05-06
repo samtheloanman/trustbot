@@ -869,7 +869,7 @@ function collectFormData() {
     // Simple fields — all IDs from the form
     const simpleFields = [
         'grantor_name', 'grantor_gender', 'grantor_address', 'grantor_city', 'grantor_state', 'grantor_zip',
-        'grantor_area_code', 'grantor_phone', 'grantor_email',
+        'grantor_area_code', 'grantor_phone', 'grantor_email', 'grantor_dob',
         'marital_status', 'spouse_name',
         'trust_name', 'execution_date', 'execution_city', 'notary_county',
         // Guardians
@@ -886,15 +886,15 @@ function collectFormData() {
         'custodian_2_name', 'custodian_2_address', 'custodian_2_city', 'custodian_2_state', 'custodian_2_zip', 'custodian_2_phone',
         // Healthcare
         'healthcare_same_as_trustees',
-        'healthcare_agent_name', 'healthcare_agent_1_gender', 'healthcare_agent_1_address', 'healthcare_agent_1_city', 'healthcare_agent_1_state', 'healthcare_agent_1_zip', 'healthcare_agent_1_phone',
-        'alternate_healthcare_agent', 'healthcare_agent_2_gender', 'healthcare_agent_2_address', 'healthcare_agent_2_city', 'healthcare_agent_2_state', 'healthcare_agent_2_zip', 'healthcare_agent_2_phone',
-        'healthcare_agent_3_name', 'healthcare_agent_3_gender', 'healthcare_agent_3_address', 'healthcare_agent_3_city', 'healthcare_agent_3_state', 'healthcare_agent_3_zip', 'healthcare_agent_3_phone',
+        'healthcare_agent_name', 'healthcare_agent_1_gender', 'healthcare_agent_1_address', 'healthcare_agent_1_city', 'healthcare_agent_1_state', 'healthcare_agent_1_zip', 'healthcare_agent_1_phone', 'healthcare_agent_1_relationship',
+        'alternate_healthcare_agent', 'healthcare_agent_2_gender', 'healthcare_agent_2_address', 'healthcare_agent_2_city', 'healthcare_agent_2_state', 'healthcare_agent_2_zip', 'healthcare_agent_2_phone', 'healthcare_agent_2_relationship',
+        'healthcare_agent_3_name', 'healthcare_agent_3_gender', 'healthcare_agent_3_address', 'healthcare_agent_3_city', 'healthcare_agent_3_state', 'healthcare_agent_3_zip', 'healthcare_agent_3_phone', 'healthcare_agent_3_relationship',
         'primary_physician_name', 'life_sustaining_treatment', 'organ_donation',
         // Financial
         'financial_poa_effective', 'financial_same_as_trustees',
-        'financial_agent_name', 'financial_agent_1_gender', 'financial_agent_1_address', 'financial_agent_city', 'financial_agent_1_state', 'financial_agent_1_zip', 'financial_agent_1_phone',
-        'alternate_financial_agent', 'financial_agent_2_gender', 'financial_agent_2_address', 'financial_agent_2_city', 'financial_agent_2_state', 'financial_agent_2_zip', 'financial_agent_2_phone',
-        'financial_agent_3_name', 'financial_agent_3_gender', 'financial_agent_3_address', 'financial_agent_3_city', 'financial_agent_3_state', 'financial_agent_3_zip', 'financial_agent_3_phone',
+        'financial_agent_name', 'financial_agent_1_gender', 'financial_agent_1_address', 'financial_agent_city', 'financial_agent_1_city', 'financial_agent_1_state', 'financial_agent_1_zip', 'financial_agent_1_phone', 'financial_agent_1_relationship',
+        'alternate_financial_agent', 'financial_agent_2_gender', 'financial_agent_2_address', 'financial_agent_2_city', 'financial_agent_2_state', 'financial_agent_2_zip', 'financial_agent_2_phone', 'financial_agent_2_relationship',
+        'financial_agent_3_name', 'financial_agent_3_gender', 'financial_agent_3_address', 'financial_agent_3_city', 'financial_agent_3_state', 'financial_agent_3_zip', 'financial_agent_3_phone', 'financial_agent_3_relationship',
         // Delivery
         'delivery_method', 'recipient_email',
     ];
