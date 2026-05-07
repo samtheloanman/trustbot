@@ -186,8 +186,16 @@ function prepareData(raw) {
         grantor_dob: raw.grantor_dob || '',
         grantor_full_address: [raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : '', raw.grantor_city, raw.grantor_state, raw.grantor_zip].filter(Boolean).join(', '),
 
-        // Trust — uses the user-provided trust name, or derives from the sanitized grantor name
-        trust_name: raw.trust_name || `The ${grantorName} Living Trust`,
+        // Trust - uses the user-provided trust name, or derives from the sanitized grantor name
+        // Clean up common data-entry artifacts: "The The X Living Trust Revocable Living Trust"
+        trust_name: (() => {
+            let tn = raw.trust_name || `The ${grantorName} Living Trust`;
+            // Fix "The The..." duplication
+            tn = tn.replace(/^The\s+The\s+/i, 'The ');
+            // Fix "Living Trust Revocable Living Trust" double suffix
+            tn = tn.replace(/Living\s+Trust\s+Revocable\s+Living\s+Trust/i, 'Living Trust');
+            return tn.trim();
+        })(),
 
         // Trustees
         grantor_is_primary_trustee: raw.primary_trustee_type !== 'other',

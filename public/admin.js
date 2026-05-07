@@ -194,7 +194,9 @@ function showModal(sub) {
 
     // Actions
     let actions = '';
-    if (sub.status !== 'completed') {
+    if (sub.status === 'completed') {
+        actions += `<button class="btn-success" onclick="generateDocs('${sub.id}')">🔄 Regenerate Documents</button>`;
+    } else {
         actions += `<button class="btn-success" onclick="generateDocs('${sub.id}')">🏛 Generate Documents</button>`;
     }
     if (sub.generatedFiles?.length) {
@@ -244,7 +246,19 @@ async function saveEdit(id) {
             body: JSON.stringify({ data: parsedData })
         });
         
-        alert('Data updated successfully!');
+        // Auto-regenerate documents with updated data
+        btnSave.textContent = '⏳ Regenerating documents...';
+        try {
+            await apiFetch('/api/admin/submissions/' + id + '/generate', { method: 'POST', body: '{}' });
+        } catch (genErr) {
+            console.error('Regeneration failed:', genErr);
+            alert('Data saved but document regeneration failed: ' + genErr.message + '\nYou can retry by clicking "Generate Documents".');
+            closeModal();
+            loadSubmissions();
+            return;
+        }
+        
+        alert('Data saved and documents regenerated successfully!');
         closeModal();
         loadSubmissions();
     } catch (err) {

@@ -675,6 +675,7 @@ function onPropertyTypeChange(id) {
 
     if (isRealEstate) {
         manualToggle.style.display = 'block';
+        descInput.placeholder = 'Enter property address (e.g. 652 Shady Ln, Santa Maria, CA 93455)';
         const manualCb = document.getElementById(`prop-manual-cb-${id}`);
         if (manualCb && manualCb.checked) {
             apnLabel.innerHTML = 'APN <span class="req">*</span> <em>(required for manual entry)</em>';
@@ -684,9 +685,15 @@ function onPropertyTypeChange(id) {
         } else {
             apnLabel.innerHTML = 'APN <em>(optional)</em>';
             document.getElementById(`prop-apn-${id}`).required = false;
-            descInput.style.display = 'none';
-            if (acEl) acEl.style.display = 'block';
-            else if (window._mapsReady) initPropertyAutocomplete(id);
+            // Always keep the text input visible as fallback
+            // If autocomplete exists, show it above. If not, the text field IS the input.
+            if (acEl) {
+                descInput.style.display = 'none';
+                acEl.style.display = 'block';
+            } else {
+                descInput.style.display = 'block';
+                if (window._mapsReady) initPropertyAutocomplete(id);
+            }
         }
     } else {
         apnLabel.innerHTML = 'APN / Account # <em>(optional)</em>';
