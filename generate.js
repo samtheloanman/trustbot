@@ -161,9 +161,20 @@ function prepareData(raw) {
 
     const isMarried = raw.marital_status === 'married' || raw.marital_status === 'legally_separated';
 
+    // Sanitize grantor name: strip trust-name suffixes if user entered a trust name
+    let grantorName = (raw.grantor_name || '').trim();
+    if (/\b(living\s+trust|revocable\s+trust|family\s+trust|irrevocable\s+trust)\b/i.test(grantorName)) {
+        grantorName = grantorName
+            .replace(/^the\s+/i, '')
+            .replace(/\s*(the\s+)?(revocable\s+)?living\s+trust.*$/i, '')
+            .replace(/\s*(the\s+)?family\s+trust.*$/i, '')
+            .replace(/\s*(the\s+)?irrevocable\s+trust.*$/i, '')
+            .trim();
+    }
+
     return {
-        // Grantor (expanded)
-        grantor_name: raw.grantor_name || '',
+        // Grantor (expanded) — always the natural person's legal name
+        grantor_name: grantorName,
         grantor_gender: raw.grantor_gender || '',
         grantor_address: raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : '',
         grantor_city: raw.grantor_city || '',
@@ -175,12 +186,12 @@ function prepareData(raw) {
         grantor_dob: raw.grantor_dob || '',
         grantor_full_address: [raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : '', raw.grantor_city, raw.grantor_state, raw.grantor_zip].filter(Boolean).join(', '),
 
-        // Trust
-        trust_name: raw.trust_name || `The ${raw.grantor_name} Revocable Living Trust`,
+        // Trust — uses the user-provided trust name, or derives from the sanitized grantor name
+        trust_name: raw.trust_name || `The ${grantorName} Living Trust`,
 
         // Trustees
         grantor_is_primary_trustee: raw.primary_trustee_type !== 'other',
-        primary_trustee_name: raw.primary_trustee_type === 'other' ? raw.primary_trustee_name : raw.grantor_name,
+        primary_trustee_name: raw.primary_trustee_type === 'other' ? raw.primary_trustee_name : grantorName,
         primary_trustee_address: raw.primary_trustee_type === 'other' ? (raw.primary_trustee_address ? raw.primary_trustee_address + (raw.primary_trustee_unit ? ', ' + raw.primary_trustee_unit : '') : '') : (raw.grantor_address ? raw.grantor_address + (raw.grantor_unit ? ', ' + raw.grantor_unit : '') : ''),
         primary_trustee_city: raw.primary_trustee_type === 'other' ? raw.primary_trustee_city : raw.grantor_city,
         primary_trustee_state: raw.primary_trustee_type === 'other' ? raw.primary_trustee_state : raw.grantor_state,

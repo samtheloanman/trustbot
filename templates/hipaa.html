@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>HIPAA Authorization — {{grantor_name}}</title>
+    <title>HIPAA Authorization - {{grantor_name}}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap');
 
@@ -86,17 +86,24 @@
 
     <h2>1. Authorized Representatives</h2>
     <div class="box">
-        <strong>Primary Representative / Healthcare Agent:</strong> {{healthcare_agent_name}} — Phone:
+        <strong>Primary Representative / Healthcare Agent:</strong> {{healthcare_agent_name}} - Phone:
         {{#if healthcare_agents.[0].phone}}{{healthcare_agents.[0].phone}}{{else}}____________________{{/if}}<br><br>
-        <strong>Alternate / Successor Trustee:</strong> {{alternate_healthcare_agent}} — Phone: {{#if healthcare_agents.[1].phone}}{{healthcare_agents.[1].phone}}{{else}}____________________{{/if}}
+        <strong>Alternate / Successor Trustee:</strong> {{alternate_healthcare_agent}} - Phone: {{#if healthcare_agents.[1].phone}}{{healthcare_agents.[1].phone}}{{else}}____________________{{/if}}
     </div>
 
-    <h2>2. Information to Be Released</h2>
+    <h2>2. Persons and Classes Authorized to Disclose</h2>
+    <p>I authorize the following persons and classes of covered entities to disclose my protected health information to
+        the representatives named above: all physicians, hospitals, clinics, pharmacies, laboratories, health plans,
+        insurance companies, skilled nursing facilities, home health agencies, mental health providers, substance use
+        treatment providers, and any other health care provider or covered entity that maintains my protected health
+        information.</p>
+
+    <h2>3. Information to Be Released</h2>
     <p>All protected health information including: medical records, diagnoses, treatment plans, mental health records,
         substance use records, HIV/AIDS records (Cal. Health &amp; Safety Code § 120980), prescription records, and
         billing/insurance records.</p>
 
-    <h2>3. Purpose</h2>
+    <h2>4. Purpose</h2>
     <ol type="a">
         <li>To allow my representative to make informed healthcare decisions on my behalf;</li>
         <li>To enable my successor trustee to manage my financial and estate planning affairs;</li>
@@ -104,25 +111,29 @@
             Power of Attorney.</li>
     </ol>
 
-    <h2>4. Expiration</h2>
+    <h2>5. Expiration</h2>
     <p>This Authorization remains in effect until my death, my written revocation, or: _________________________
         (specific date, if any). It survives my incapacity.</p>
 
-    <h2>5. Rights and Voluntary Consent</h2>
-    <p>I understand I have the right to revoke this Authorization in writing at any time. I understand that signing is
-        voluntary and is not a condition of receiving any treatment or benefit. Information disclosed may be subject to
-        re-disclosure by the recipient.</p>
+    <h2>6. Rights, Revocation, and Voluntary Consent</h2>
+    <p>I understand I have the right to revoke this Authorization in writing at any time by delivering a signed written
+        revocation to each health care provider or covered entity that received a copy of this Authorization. A
+        revocation is not effective to the extent that any person or entity has already acted in reliance on this
+        Authorization before receiving notice of revocation (45 C.F.R. § 164.508(b)(5)).</p>
+    <p>I understand that signing is voluntary and is not a condition of receiving any treatment, payment, enrollment, or
+        eligibility for benefits. Information disclosed under this Authorization may be subject to re-disclosure by the
+        recipient and may no longer be protected by federal privacy regulations.</p>
 
-    <h2>6. Signature</h2>
+    <h2>7. Signature</h2>
     <div style="margin-top:36px;">
         <div class="sig-line"></div>
-        <div class="sig-label"><strong>{{grantor_name}}</strong>, Principal — Date: ______________</div>
+        <div class="sig-label"><strong>{{grantor_name}}</strong>, Principal - Date: ______________</div>
     </div>
 
     <div style="margin-top:30px;">
         <p><em>If signed by personal representative:</em></p>
         <div class="sig-line"></div>
-        <div class="sig-label">Signature of Personal Representative — Date: ______________</div>
+        <div class="sig-label">Signature of Personal Representative - Date: ______________</div>
         <div class="sig-line"></div>
         <div class="sig-label">Printed Name &amp; Authority (e.g., Power of Attorney)</div>
     </div>

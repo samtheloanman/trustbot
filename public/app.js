@@ -11,6 +11,20 @@ let financialAgent3Visible = false;
 let isLoggedIn = false;
 let currentUser = null;
 
+// ================= GRANTOR NAME VALIDATION =================
+document.addEventListener('DOMContentLoaded', function() {
+    const grantorInput = document.getElementById('grantor_name');
+    const warningDiv = document.getElementById('grantor_name_warning');
+    if (grantorInput && warningDiv) {
+        const trustPattern = /\b(living\s+trust|family\s+trust|revocable\s+trust|irrevocable\s+trust|llc|inc\.|corporation)\b/i;
+        function checkGrantorName() {
+            warningDiv.style.display = trustPattern.test(grantorInput.value) ? 'block' : 'none';
+        }
+        grantorInput.addEventListener('input', checkGrantorName);
+        grantorInput.addEventListener('blur', checkGrantorName);
+    }
+});
+
 // ================= AUTH CHECK =================
 (async function checkAuth() {
     const token = localStorage.getItem('trustbot_token');

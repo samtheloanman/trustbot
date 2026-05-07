@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Pour-Over Will — {{grantor_name}}</title>
+    <title>Pour-Over Will - {{grantor_name}}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap');
 
@@ -110,21 +110,21 @@
     <p>I, <strong>{{grantor_name}}</strong>, of {{grantor_city}}, {{grantor_state}}, declare this to be my Last Will and
         Testament (Pour-Over Will), revoking all prior wills and codicils previously made by me.</p>
 
-    <h2>Article I — Identification</h2>
+    <h2>Article I - Identification</h2>
     <ol>
         <li>I am not married at the time of this Will's execution.
             {{#if is_married}}<strong>Correction: I am married to {{spouse_name}}.</strong>{{/if}}</li>
         <li>I make this Will freely and voluntarily, being of legal age and sound mind.</li>
     </ol>
 
-    <h2>Article II — Debts and Expenses</h2>
+    <h2>Article II - Debts and Expenses</h2>
     <ol start="3">
         <li>I direct my Personal Representative to pay all my legally enforceable debts, funeral expenses, and costs of
             administration of my estate from the assets of my estate as soon as practicable after my death, subject to
             any right I may have to direct otherwise.</li>
     </ol>
 
-    <h2>Article III — Pour-Over Bequest</h2>
+    <h2>Article III - Pour-Over Bequest</h2>
     <ol start="4">
         <li>I give, devise, and bequeath all of my property, real, personal, and mixed, of whatever nature and wherever
             situated, that I own at my death and that has not been transferred to the <strong>{{trust_name}}</strong>
@@ -141,7 +141,7 @@
             6300.</li>
     </ol>
 
-    <h2>Article IV — Personal Representative</h2>
+    <h2>Article IV - Personal Representative</h2>
     <ol start="7">
         <li>I appoint <strong>{{successor_trustee_list}}</strong>, in the order listed, as Personal Representative(s) of
             this Will. No bond shall be required of any Personal Representative.</li>
@@ -151,21 +151,23 @@
             for court approval for ordinary estate transactions.</li>
     </ol>
 
-    <h2>Article V — Guardian for Minor Children (if applicable)</h2>
+    {{#if has_minor_children}}
+    <h2>Article V - Guardian for Minor Children</h2>
     <ol start="9">
         <li>If I have minor children at the time of my death, I nominate <strong>{{successor_trustee_list}}</strong> as
             guardian(s) of the person and estate of any such minor children, in the order listed. No bond shall be
             required of any guardian.</li>
     </ol>
+    {{/if}}
 
-    <h2>Article VI — No-Contest Clause</h2>
+    <h2>Article VI - No-Contest Clause</h2>
     <ol start="10">
         <li>If any beneficiary under this Will contests or attacks this Will or any of its provisions, any share or
             interest in my estate given to the contesting beneficiary under this Will is revoked, unless the contest is
             brought in good faith and upon probable cause (Cal. Prob. Code § 21311).</li>
     </ol>
 
-    <h2>Article VII — Governing Law</h2>
+    <h2>Article VII - Governing Law</h2>
     <ol start="11">
         <li>This Will shall be governed, construed, and administered in accordance with the laws of the State of
             {{execution_state}}.</li>
@@ -196,7 +198,7 @@
         <div class="sig-pair">
             <div>
                 <div class="sig-line"></div>
-                <div class="sig-label">Witness #1 Signature — Date: ______________</div>
+                <div class="sig-label">Witness #1 Signature - Date: ______________</div>
                 <div class="sig-line"></div>
                 <div class="sig-label">Witness #1 Printed Name</div>
                 <div class="sig-line"></div>
@@ -204,7 +206,7 @@
             </div>
             <div>
                 <div class="sig-line"></div>
-                <div class="sig-label">Witness #2 Signature — Date: ______________</div>
+                <div class="sig-label">Witness #2 Signature - Date: ______________</div>
                 <div class="sig-line"></div>
                 <div class="sig-label">Witness #2 Printed Name</div>
                 <div class="sig-line"></div>

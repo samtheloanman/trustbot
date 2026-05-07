@@ -83,14 +83,17 @@
           </div>
           <div class="field-grid">
             <div class="field full">
-              <label>Full Legal Name <span class="req">*</span></label>
+              <label>Full Legal Name <span class="req">*</span> <small style="font-weight:normal; color:#666;">(individual person, not trust name)</small></label>
               <input
                 type="text"
                 id="grantor_name"
                 name="grantor_name"
-                placeholder="e.g. John Matthew Gamboa"
+                placeholder="e.g. Rafael Hernandez"
                 required
               />
+              <div id="grantor_name_warning" style="display:none; color:#c44; font-size:0.85em; margin-top:4px;">
+                This field should contain the individual's full legal name, not the trust name.
+              </div>
             </div>
             <div class="field full">
               <label>Gender</label>

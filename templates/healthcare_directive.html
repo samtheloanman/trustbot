@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>California Advance Health Care Directive — {{grantor_name}}</title>
+    <title>California Advance Health Care Directive - {{grantor_name}}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
 
@@ -108,13 +108,7 @@
         (Living Will and Healthcare Power of Attorney Combined)<br>
         Pursuant to California Probate Code § 4701
     </div>
-    <div class="disclaimer">
-        <strong>Notice to Person Completing This Form:</strong> This form lets you name an individual, called an agent,
-        to make health care decisions for you if you lose the capacity to make your own decisions or if you want someone
-        else to make those decisions for you now even though you have that capacity. You may also use this form to give
-        specific instructions about any aspect of your health care. Carefully read all information before signing.
-        Consult a lawyer if desired.
-    </div>
+
 
     <div class="box">
         <strong>Principal:</strong> {{grantor_name}}<br>
@@ -122,7 +116,7 @@
         <strong>Date:</strong> {{execution_day_ordinal}} day of {{execution_month}}, {{execution_year}}
     </div>
 
-    <h2>Part 1 — Power of Attorney for Health Care</h2>
+    <h2>Part 1 - Power of Attorney for Health Care</h2>
 
     <p><strong>1.1 Designation of Agent.</strong> I, <strong>{{grantor_name}}</strong>, designate the following
         individual as my agent to make health care decisions for me:</p>
@@ -169,7 +163,7 @@
         court, I nominate the agent designated in this form. If that agent is not willing, able, or reasonably available
         to act as conservator, I nominate the alternate agents listed above, in the order listed.</p>
 
-    <h2>Part 2 — Instructions for Health Care</h2>
+    <h2>Part 2 - Instructions for Health Care</h2>
     <p>If you fill out this part of the form, you may strike any wording you do not want.</p>
 
     <p><strong>End-of-Life Decisions.</strong> I direct that my health care providers and others involved in my care
@@ -199,7 +193,7 @@
         ____________________________________________________________________________
     </div>
 
-    <h2>Part 3 — Donation of Organs at Death</h2>
+    <h2>Part 3 - Donation of Organs at Death</h2>
     <p>(optional)</p>
     {{#if organ_donation}}
     <p>Upon my death, I give all of my organs, tissues, or eyes for the purpose of:
@@ -210,7 +204,7 @@
         ☐ I do not wish to donate organs, tissues, or eyes.</p>
     {{/if}}
 
-    <h2>Part 4 — Primary Physician (Optional)</h2>
+    <h2>Part 4 - Primary Physician (Optional)</h2>
     <p>I designate the following physician as my primary physician:</p>
     <div class="box">
         <strong>Physician:</strong> {{#if
@@ -220,7 +214,7 @@
 
     <!-- SIGNATURE BLOCK -->
     <div class="page-break">
-        <h2>Part 5 — Signature</h2>
+        <h2>Part 5 - Signature</h2>
         <div class="disclaimer">
             <strong>SIGN AND DATE THE FORM HERE:</strong> By signing here I indicate that I understand the purpose and
             effect of this document.
@@ -246,6 +240,14 @@
             a residential care facility for the elderly.
         </div>
 
+        <div class="disclaimer" style="margin-top:10px;">
+            <strong>ADDITIONAL DECLARATION OF WITNESS (at least one witness must sign below):</strong>
+            I further declare under penalty of perjury under the laws of California that I am not related
+            to the principal by blood, marriage, or adoption, and, to the best of my knowledge, I am not
+            entitled to any part of the estate of the principal upon the death of the principal under a will
+            now existing or by operation of law. (Cal. Prob. Code § 4674.)
+        </div>
+
         <div style="display:flex; gap:60px; margin-top:20px;">
             <div>
                 <div class="sig-line"></div>
@@ -268,17 +270,16 @@
         <div class="disclaimer" style="margin-top:20px;">
             <strong>Additional Witness Requirement for Skilled Nursing Facilities:</strong> If you are a patient in a
             skilled nursing facility, one of the witnesses must be a patient advocate or ombudsman. The patient advocate
-            or ombudsman must sign the following declaration:
+            or ombudsman must sign the following declaration (Cal. Prob. Code § 4675):
         </div>
         <p>I further declare under penalty of perjury that I am a patient advocate or ombudsman as designated by the
-            State Department of Aging and that I am serving as a witness as required by subdivision (f) of Health and
-            Safety Code Section 1418.8.</p>
+            State Department of Aging and that I am serving as a witness as required by California Probate Code § 4675.</p>
         <div class="sig-line"></div>
         <div class="sig-label">Patient Advocate / Ombudsman (if applicable)</div>
 
         <!-- NOTARY OPTION -->
         <div class="notary-box" style="margin-top:36px;">
-            <h3>OPTIONAL — Notary Acknowledgment</h3>
+            <h3>OPTIONAL - Notary Acknowledgment</h3>
             <p style="font-size:10pt;font-style:italic;">(This document may be notarized <em>instead</em> of using the
                 above witness declarations.)</p>
             <p><strong>STATE OF CALIFORNIA, COUNTY OF {{notary_county}}</strong></p>
