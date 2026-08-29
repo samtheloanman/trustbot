@@ -1,11 +1,19 @@
 // ── State ────────────────────────────────────────────────────
-let token = localStorage.getItem('trustbot_token');
+// No token here any more. The session lives in an HttpOnly cookie the browser
+// attaches automatically, so script cannot read it -- and an XSS on this page
+// can no longer walk off with it.
 let currentUser = null;
 let allSubmissions = [];
 
+// Readable companion cookie, echoed back as a header so the server can tell a
+// genuine same-origin request apart from a cross-site forgery.
+function csrfToken() {
+    const m = document.cookie.match(/(?:^|;\s*)trustbot_csrf=([^;]*)/);
+    return m ? decodeURIComponent(m[1]) : '';
+}
+
 // ── Auth check ───────────────────────────────────────────────
 (async function init() {
-    if (!token) return window.location.href = '/login';
     try {
         const resp = await apiFetch('/api/auth/me');
         currentUser = resp.user;
@@ -24,9 +32,12 @@ let allSubmissions = [];
 async function apiFetch(url, opts = {}) {
     const resp = await fetch(url, {
         ...opts,
+        // Send the session cookie. Same-origin is the default, but stating it
+        // makes the dependency explicit now that there is no header to carry.
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token,
+            'X-CSRF-Token': csrfToken(),
             ...(opts.headers || {}),
         },
     });
@@ -200,9 +211,11 @@ function showModal(sub) {
         actions += `<button class="btn-success" onclick="generateDocs('${sub.id}')">🏛 Generate Documents</button>`;
     }
     if (sub.generatedFiles?.length) {
-        const token = localStorage.getItem('trustbot_token') || '';
+        // No ?token= any more. The session cookie rides along on the navigation
+        // by itself, which keeps the credential out of access logs, browser
+        // history and Referer headers -- all places the query string leaked to.
         actions += `<div class="download-links">${sub.generatedFiles.map(f =>
-            `<a href="${f.url}${f.url.includes('?') ? '&' : '?'}token=${token}" target="_blank">📄 ${f.name.replace(/_/g, ' ').replace('.pdf', '')}</a>`
+            `<a href="${f.url}" target="_blank">📄 ${f.name.replace(/_/g, ' ').replace('.pdf', '')}</a>`
         ).join('')}</div>`;
     }
     actions += `<button class="btn-warning" style="background:rgba(245, 158, 11, 0.15); color:#f59e0b; border:1px solid rgba(245, 158, 11, 0.3); padding:10px 22px; border-radius:100px; cursor:pointer;" onclick="toggleEdit('${sub.id}')" id="btnEditToggle">Edit Data</button>`;
@@ -309,9 +322,12 @@ async function deleteSubmission(id) {
 }
 
 // ── Logout ───────────────────────────────────────────────────
-function logout() {
-    localStorage.removeItem('trustbot_token');
-    localStorage.removeItem('trustbot_user');
+// Must round-trip to the server: an HttpOnly cookie cannot be cleared by script,
+// so clearing it client-side would leave the session valid.
+async function logout() {
+    try {
+        await apiFetch('/api/auth/logout', { method: 'POST' });
+    } catch { /* clear the client regardless */ }
     window.location.href = '/login';
 }
 

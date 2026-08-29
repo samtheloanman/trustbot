@@ -26,11 +26,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ================= AUTH CHECK =================
+// Readable companion to the HttpOnly session cookie, echoed back as a header so
+// the server can distinguish a genuine same-origin request from a forgery.
+function csrfToken() {
+    const m = document.cookie.match(/(?:^|;\s*)trustbot_csrf=([^;]*)/);
+    return m ? decodeURIComponent(m[1]) : '';
+}
+
+// The session cookie is sent automatically and cannot be read by script, so
+// rather than inspect a stored token we just ask the server who we are. A 401
+// simply means anonymous, which this page allows.
 (async function checkAuth() {
-    const token = localStorage.getItem('trustbot_token');
-    if (!token) return; // allow anonymous access
     try {
-        const resp = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+        const resp = await fetch('/api/auth/me', { credentials: 'same-origin' });
+        if (!resp.ok) return; // anonymous is fine
         const data = await resp.json();
         if (data.user) {
             isLoggedIn = true;
@@ -45,9 +54,16 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) { /* anonymous is fine */ }
 })();
 
-function logout() {
-    localStorage.removeItem('trustbot_token');
-    localStorage.removeItem('trustbot_user');
+// Must round-trip to the server: an HttpOnly cookie cannot be cleared by script,
+// so clearing it client-side would leave the session valid.
+async function logout() {
+    try {
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-CSRF-Token': csrfToken() },
+        });
+    } catch { /* redirect regardless */ }
     window.location.href = '/login';
 }
 
@@ -946,9 +962,10 @@ async function submitForm() {
         try {
             const resp = await fetch('/api/submissions', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('trustbot_token'),
+                    'X-CSRF-Token': csrfToken(),
                 },
                 body: JSON.stringify(data),
             });

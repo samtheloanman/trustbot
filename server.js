@@ -3,7 +3,8 @@ const express = require('express');
 const path = require('path');
 const { generateTrustPackage } = require('./generate');
 const { sendTrustPackage } = require('./email');
-const { mountAuthRoutes, requireAdmin, requireClient } = require('./auth');
+const cookieParser = require('cookie-parser');
+const { mountAuthRoutes, requireAdmin, requireClient, csrfProtection } = require('./auth');
 const submissions = require('./submissions');
 const { supabase } = require('./db');
 
@@ -12,7 +13,13 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Required before csrfProtection and verifyToken -- both read req.cookies.
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Applies to every state-changing request. Must be mounted before the routes it
+// protects, including the auth routes below.
+app.use(csrfProtection);
 
 // ── Auth routes ──────────────────────────────────────────────
 mountAuthRoutes(app);
@@ -115,14 +122,10 @@ app.post('/api/admin/submissions/:id/generate', requireAdmin, async (req, res) =
             });
             
         if (error) throw new Error('Upload failed: ' + error.message);
-        
-        const { data } = supabase.storage
-            .from('trustbot-docs')
-            .getPublicUrl(storagePath);
-            
-        // We use the local route so it looks the same to the frontend, 
-        // but it will redirect to the public URL. Or we can just return the public URL directly.
-        // Returning local route so we don't need to change frontend.
+
+        // Hand back only the guarded local route. Previously a public storage
+        // URL was also minted here; it is gone because the download route now
+        // signs a short-lived URL at request time, behind requireAdmin.
         files.push({ name, url: `/api/admin/submissions/${sub.id}/download/${name}` });
     }
 
@@ -136,100 +139,55 @@ app.post('/api/admin/submissions/:id/generate', requireAdmin, async (req, res) =
 
     res.json({ success: true, files });
   } catch (err) {
+    // Log detail server-side; return a generic message. Interpolating err.message
+    // leaked storage paths, upstream API errors and internal state to the client.
     console.error('[TrustBot] Generation error:', err);
-    res.status(500).json({ error: 'Failed to generate: ' + err.message });
+    res.status(500).json({ error: 'Failed to generate documents' });
   }
 });
 
 // ── Admin: download generated PDF ────────────────────────────
-app.get('/api/admin/submissions/:id/download/:filename', requireAdmin, (req, res) => {
+app.get('/api/admin/submissions/:id/download/:filename', requireAdmin, async (req, res) => {
   const { id, filename } = req.params;
-  const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(`${id}/${filename}`);
-  res.redirect(data.publicUrl);
-});
 
-// ── Legacy: direct generation — public access for testing/demos ────────────────
-// Clients use /api/submissions for the main flow.
-// Admins trigger generation via /api/admin/submissions/:id/generate.
-// This route is public to allow demo document generation without logging in.
-app.post('/generate', async (req, res) => {
-  const tag = `[/generate ${req.user?.email ?? 'unknown'}]`;
-  try {
-    const formData = req.body;
-    console.log(tag, 'Starting PDF generation for:', formData.grantor_name);
+  // Signed, not public. getPublicUrl() returns an unauthenticated URL, so the
+  // requireAdmin check above only guarded the redirect -- the document itself
+  // stayed readable to anyone holding or guessing the path, and those URLs were
+  // previously handed to the browser and could be copied out of history or
+  // shared. A short-lived signed URL makes the access check actually bind to
+  // the object. Requires the 'trustbot-docs' bucket to be private; if it is
+  // still public, flipping it is part of the deployment prerequisites.
+  const { data, error } = await supabase.storage
+    .from('trustbot-docs')
+    .createSignedUrl(`${id}/${filename}`, 60);
 
-    const required = ['grantor_name', 'grantor_city', 'trust_name', 'successor_trustee_1_name'];
-    for (const field of required) {
-      if (!formData[field]) {
-        console.warn(tag, 'Missing required field:', field);
-        return res.status(400).json({ error: `Missing required field: ${field}` });
-      }
-    }
-
-    console.log(tag, 'Launching Chromium for PDF rendering...');
-    const t0 = Date.now();
-    const { pdfBuffers, fileNames } = await generateTrustPackage(formData);
-    console.log(tag, `PDFs generated in ${Date.now() - t0}ms — ${fileNames.length} docs`);
-
-    // Save to DB so it appears on the admin dashboard (even for anonymous/legacy submissions)
-    const subId = 's-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-
-    if (formData.delivery_method === 'email' && formData.recipient_email) {
-      await sendTrustPackage(formData.recipient_email, formData.grantor_name, pdfBuffers, fileNames);
-      console.log(tag, 'Emailed to:', formData.recipient_email);
-
-      // Record in DB with completed status
-      await submissions.create('anonymous', formData.grantor_name || 'Anonymous', formData.grantor_email || formData.recipient_email || '', formData)
-        .then(sub => submissions.update(sub.id, { status: 'completed' }))
-        .catch(e => console.error(tag, 'DB save (non-fatal):', e.message));
-
-      return res.json({
-        success: true,
-        message: `Trust package emailed to ${formData.recipient_email}`,
-        files: fileNames.map(name => ({ name }))
-      });
-    }
-
-    const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    const files = [];
-
-    for (let i = 0; i < pdfBuffers.length; i++) {
-        const buf = pdfBuffers[i];
-        const name = fileNames[i];
-        const storagePath = `legacy/${sessionId}/${name}`;
-
-        const { error } = await supabase.storage
-            .from('trustbot-docs')
-            .upload(storagePath, buf, { contentType: 'application/pdf', upsert: true });
-
-        if (error) {
-          console.error(tag, 'Storage upload failed for', name, ':', error.message);
-          throw new Error('Upload failed: ' + error.message);
-        }
-
-        const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(storagePath);
-        files.push({ name, url: `/download/${sessionId}/${name}` });
-    }
-
-    // Record in DB so admins see it on the dashboard
-    await submissions.create('anonymous', formData.grantor_name || 'Anonymous', formData.grantor_email || '', formData)
-      .then(sub => submissions.update(sub.id, { status: 'completed', generatedFiles: files }))
-      .catch(e => console.error(tag, 'DB save (non-fatal):', e.message));
-
-    console.log(tag, 'Done. Files:', files.map(f => f.name).join(', '));
-    res.json({ success: true, files });
-  } catch (err) {
-    console.error(tag, 'FATAL ERROR:', err.message, '\nStack:', err.stack);
-    res.status(500).json({ error: 'Failed to generate trust package: ' + err.message });
+  if (error || !data?.signedUrl) {
+    console.error('[TrustBot] Signed URL error:', error);
+    return res.status(404).json({ error: 'Document not available' });
   }
+
+  res.redirect(data.signedUrl);
 });
 
-// Legacy download route
-app.get('/download/:sessionId/:filename', (req, res) => {
-  const { sessionId, filename } = req.params;
-  const { data } = supabase.storage.from('trustbot-docs').getPublicUrl(`legacy/${sessionId}/${filename}`);
-  res.redirect(data.publicUrl);
-});
+// ── Removed: legacy public POST /generate and GET /download ───────────────────
+//
+// Both were unauthenticated on a legal-document system and are deleted rather
+// than gated, because neither had a caller left: the client flow goes through
+// POST /api/submissions and admin generation through
+// POST /api/admin/submissions/:id/generate.
+//
+// What they exposed while public:
+//   - Anyone could generate a full trust package and have it emailed to any
+//     address they supplied, making the service an open relay for
+//     authentic-looking legal documents sent from this domain.
+//   - Each call launched headless Chromium, so unauthenticated traffic could
+//     exhaust server resources.
+//   - Documents were written to storage and rows inserted as 'anonymous'.
+//   - GET /download/:sessionId/:filename redirected to a storage URL keyed only
+//     by a timestamp plus five random characters, with no ownership check.
+//
+// If a public demo is wanted later it belongs in a separate deployment with
+// its own storage bucket, not on the instance holding real client documents.
 
 // ── Start server (only if run directly) ────────────────────────────────────────────────────────────
 if (require.main === module) {

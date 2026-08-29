@@ -148,16 +148,22 @@
     </div>
 
     <script>
+        // Google/GitHub sign-in was removed along with the Supabase browser
+        // bridge. That flow ran supabase-js in the page, which keeps its own
+        // session and PKCE code verifier in localStorage -- reintroducing
+        // exactly the browser-readable credential this containment pass exists
+        // to eliminate. Social sign-in returns with the portfolio-wide OIDC
+        // client integration, server-side, not as a per-app bridge.
         let isRegister = false;
 
-        // Check if already logged in
+        // Check if already logged in. The session cookie is HttpOnly, so there
+        // is nothing to read locally -- ask the server instead. A 401 just means
+        // not signed in, which is the normal case on this page.
         (function checkAuth() {
-            const token = localStorage.getItem('trustbot_token');
-            if (!token) return;
-            fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
-                .then(r => r.json())
+            fetch('/api/auth/me', { credentials: 'same-origin' })
+                .then(r => (r.ok ? r.json() : null))
                 .then(data => {
-                    if (data.user) {
+                    if (data && data.user) {
                         redirectByRole(data.user.role);
                     }
                 })
@@ -224,6 +230,7 @@
             try {
                 const resp = await fetch(endpoint, {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
                 });
@@ -234,8 +241,8 @@
                     return;
                 }
 
-                localStorage.setItem('trustbot_token', data.token);
-                localStorage.setItem('trustbot_user', JSON.stringify(data.user));
+                // The server set the session as an HttpOnly cookie on this
+                // response; there is deliberately no token in the body to store.
                 showSuccess('Welcome, ' + data.user.name + '!');
 
                 setTimeout(() => redirectByRole(data.user.role), 500);
